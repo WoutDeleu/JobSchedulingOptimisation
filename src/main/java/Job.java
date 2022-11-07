@@ -9,7 +9,7 @@ public class Job {
     private int dueDate;
     @SerializedName("earliness_penalty")
     private double earlinessPenalty;
-    @SerializedName("rejectin_penalty")
+    @SerializedName("rejection_penalty")
     private double rejectionPenalty;
 
     @Override
@@ -17,10 +17,10 @@ public class Job {
         return "Job{" +
                 "id=" + id +
                 ", duration=" + duration +
-                ", release_date=" + releaseDate +
-                ", due_date=" + dueDate +
-                ", earliness_penalty=" + earlinessPenalty +
-                ", rejection_penalty=" + rejectionPenalty +
+                ", releaseDate=" + releaseDate +
+                ", dueDate=" + dueDate +
+                ", earlinessPenalty=" + earlinessPenalty +
+                ", rejectionPenalty=" + rejectionPenalty +
                 "} \n";
     }
 }

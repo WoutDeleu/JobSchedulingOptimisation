@@ -25,12 +25,11 @@ public class InputData {
     public String toString() {
         return "InputData{" +
                 "name='" + name + '\'' +
-                ", weight_duration=" + weightDuration +
+                ", weightDuration=" + weightDuration +
                 ", horizon=" + horizon +
-                "\n, jobs=" + jobs +
+                ",\n jobs=" + jobs +
                 ", unavailability=" + unavailability +
 //                ", setups=" + setups +
                 '}';
     }
-
 }
