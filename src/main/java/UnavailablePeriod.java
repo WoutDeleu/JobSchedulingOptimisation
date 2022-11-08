@@ -1,4 +1,4 @@
-public class UnavailablePeriod extends Task{
+public class UnavailablePeriod extends Task {
 
     //TODO hoe kunnen we met startDate en finishDate werken van Task object
     //  - Als we dat nu doen loopt inlezen van json mis door attributen die niet overeen komen

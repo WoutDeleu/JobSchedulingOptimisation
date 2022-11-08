@@ -20,21 +20,21 @@ public class Task {
     public void setFinishDate(int finishDate) {
         this.finishDate = finishDate;
     }
-
     // Returns true if the job doesn't overlap with any unavailable periods
     public boolean checkExecutable(List<UnavailablePeriod> unavailablePeriods) {
         assert startDate >= 0 : "startDate not set";
         assert finishDate >= 0 : "finishDate not set";
         for (UnavailablePeriod up : unavailablePeriods) {
-            int start = up.getStartDate();
-            int end = up.getFinishDate();
-            // Not executable if start or finish of a job lies in unavailable period:
-            // start<startDate<finishDate or startDate<end<finishDate
-            if(start<=startDate&&startDate<=end || start<=finishDate&&finishDate<=end) {
+            int startUp = up.getStartDate();
+            int endUp = up.getFinishDate();
+            // Not executable if startUp or finish of a job lies in unavailable period:
+            // startUp<startDate<finishDate or startDate<endUp<finishDate
+            if(startUp <=startDate&&startDate<= endUp || startUp <=finishDate&&finishDate<= endUp) {
                 return false;
             }
         }
         return true;
     }
+
 
 }

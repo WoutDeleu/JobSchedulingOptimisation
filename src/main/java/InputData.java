@@ -9,12 +9,19 @@ public class InputData {
     private String name;
     @SerializedName("weight_duration")
     private double weightDuration;
+
+    public int getHorizon() {
+        return horizon;
+    }
+
     private int horizon;
     private ArrayList<Job> jobs = new ArrayList<>();
     @SerializedName("unavailability")
     private ArrayList<UnavailablePeriod> unavailablePeriods = new ArrayList<>();
     private ArrayList<int[]> setups = new ArrayList<>();
-
+    public SetupList generateSetupList() {
+        return new SetupList(setups);
+    }
     public int[][] getSetupMatrix() {
         int N = jobs.size();
         int[][] matrix = new int[N][N];
@@ -50,4 +57,5 @@ public class InputData {
 //                ", setups=" + setups +
                 '}';
     }
+
 }

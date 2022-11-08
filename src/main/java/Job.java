@@ -50,7 +50,7 @@ public class Job extends Task{
     }
 
     public void calculateFinishDate() {
-        finishDate = startDate + duration;
+        this.finishDate = this.startDate + this.duration;
     }
 
 
@@ -59,13 +59,17 @@ public class Job extends Task{
     public String toString() {
         return "Job{" +
                 "id=" + id +
-                ", duration=" + duration +
+//                ", duration=" + duration +
                 ", releaseDate=" + releaseDate +
                 ", dueDate=" + dueDate +
-                ", earlinessPenalty=" + earlinessPenalty +
-                ", rejectionPenalty=" + rejectionPenalty +
+//                ", earlinessPenalty=" + earlinessPenalty +
+//                ", rejectionPenalty=" + rejectionPenalty +
                 ", startDate=" + startDate +
                 ", finishDate=" + finishDate +
                 "} \n";
+    }
+
+    public boolean makesDueDate(int startingTime) {
+        return startingTime + duration <= dueDate;
     }
 }
