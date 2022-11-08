@@ -10,13 +10,13 @@ public class UnavailablePeriod extends Task{
         super(start, end);
     }
 
-    public int getStart() { return start; }
-    public int getEnd() {
+    public int getStartDate() { return start; }
+    public int getFinishDate() {
         return end;
     }
 
-    public void setStart(int start) { this.start = start; }
-    public void setEnd(int end) {
+    public void setStartDate(int start) { this.start = start; }
+    public void setFinishDate(int end) {
         this.end = end;
     }
 

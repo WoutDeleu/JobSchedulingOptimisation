@@ -74,7 +74,10 @@ public class main {
                 if (job.checkExecutable(inputData.getUnavailablePeriods())) {
                     scheduledTasks.add(job);
                 }
-                //TODO Reverse process if something fails
+                //TODO Reverse process if something fails: aparte methode queueSetup(), start en begin op -1 zetten
+                else{
+                    scheduledTasks.remove(setup);
+                }
             }
 
             else {
@@ -94,7 +97,7 @@ public class main {
     }
 
 
-
+    //TODO waarom is waiting queue leeg?
     public static void queueJob(Job job) {
         job.setStartDate(-1);
         job.setFinishDate(-1);

@@ -42,6 +42,8 @@ public class Setup extends Task{
                 "duration=" + duration +
                 ", job1=" + job1 +
                 ", job2=" + job2 +
+                ", startDate=" + startDate +
+                ", finishDate=" + finishDate +
                 "} \n";
     }
 }
