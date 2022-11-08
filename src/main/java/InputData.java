@@ -2,6 +2,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class InputData {
     private String name;
@@ -9,7 +11,8 @@ public class InputData {
     private double weightDuration;
     private int horizon;
     private ArrayList<Job> jobs = new ArrayList<>();
-    private ArrayList<UnavailablePeriod> unavailability = new ArrayList<>();
+    @SerializedName("unavailability")
+    private ArrayList<UnavailablePeriod> unavailablePeriods = new ArrayList<>();
     private ArrayList<int[]> setups = new ArrayList<>();
 
     public int[][] getSetupMatrix() {
@@ -21,6 +24,21 @@ public class InputData {
         return matrix;
     }
 
+    public Setup getSetup(int id1, int id2) {
+        int duration = setups.get(id1)[id2];
+        return new Setup(duration, id1, id2);
+    }
+
+    public List<Job> getJobsSortedReleaseDate() {
+        // sort by release date
+        jobs.sort(new JobComparator());
+        return jobs;
+    }
+
+    public List<UnavailablePeriod> getUnavailablePeriods() {
+        return unavailablePeriods;
+    }
+
     @Override
     public String toString() {
         return "InputData{" +
@@ -28,7 +46,7 @@ public class InputData {
                 ", weightDuration=" + weightDuration +
                 ", horizon=" + horizon +
                 ",\n jobs=" + jobs +
-                ", unavailability=" + unavailability +
+                ", unavailability=" + unavailablePeriods +
 //                ", setups=" + setups +
                 '}';
     }
