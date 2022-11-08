@@ -27,8 +27,9 @@ public class main_Wout {
         System.out.println("scheduled: \n"+scheduledTasks);
         System.out.println("waiting: \n"+waitingJobs);
 
+        // todo: write to json
         // Write to JSON-file
-//        writeFile("calculatedSolution/TEMPSOLUTION_A-100-30.json");
+        // writeFile("calculatedSolution/TEMPSOLUTION_A-100-30.json");
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
