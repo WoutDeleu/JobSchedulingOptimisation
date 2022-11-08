@@ -57,16 +57,18 @@ public class Job extends Task{
 
     @Override
     public String toString() {
-        return "Job{" +
+        return
+                "Job{" +
+//                "{" +
                 "id=" + id +
-//                ", duration=" + duration +
+                ", duration=" + duration +
                 ", releaseDate=" + releaseDate +
                 ", dueDate=" + dueDate +
-//                ", earlinessPenalty=" + earlinessPenalty +
-//                ", rejectionPenalty=" + rejectionPenalty +
-                ", startDate=" + startDate +
+                ", earlinessPenalty=" + earlinessPenalty +
+                ", rejectionPenalty=" + rejectionPenalty +
+                ", start=" + startDate +
                 ", finishDate=" + finishDate +
-                "} \n";
+                "}, \n";
     }
 
     public boolean makesDueDate(int startingTime) {

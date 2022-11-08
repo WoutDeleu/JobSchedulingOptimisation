@@ -40,9 +40,9 @@ public class Setup extends Task{
     public String toString() {
         return "Setup{" +
                 "duration=" + duration +
-                ", job1=" + job1 +
-                ", job2=" + job2 +
-                ", startDate=" + startDate +
+                ", from=" + job1 +
+                ", to=" + job2 +
+                ", start=" + startDate +
                 ", finishDate=" + finishDate +
                 "} \n";
     }

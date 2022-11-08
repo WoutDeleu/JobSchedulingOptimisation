@@ -12,9 +12,10 @@ public class main_Wout {
     private static LinkedList<Task> scheduledTasks = new LinkedList<>();
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
     private static int horizon;
+    private static int currentBestValue;
 
     public static void main(String[] args) {
-        InputData inputData = readFile("datasets/TOY-20-10.json");
+        InputData inputData = readFile("datasets/A-100-30.json");
         SetupList setups = inputData.generateSetupList();
         List<Job> jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -26,6 +27,8 @@ public class main_Wout {
         System.out.println("scheduled: \n"+scheduledTasks);
         System.out.println("waiting: \n"+waitingJobs);
 
+        // Write to JSON-file
+//        writeFile("calculatedSolution/TEMPSOLUTION_A-100-30.json");
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
@@ -59,7 +62,6 @@ public class main_Wout {
             scheduledTasks.removeLast();
             queueJob(j);
         }
-
 
         // todo : fill up holes
     }
@@ -151,6 +153,7 @@ public class main_Wout {
         InputData inputData = null;
         try {
             String jsonString = Files.readString(Paths.get(path));
+            System.out.println(jsonString);
             Gson gson = new Gson();
             inputData = gson.fromJson(jsonString, InputData.class);
         }
@@ -158,6 +161,22 @@ public class main_Wout {
         return inputData;
     }
 
+//    private static void writeFile(String path) {
+//        String json = "";
+//        json = json + "{ " + "\"name\": " + "\"TEMPSOLUTION_A-100-30.json\"\n" + "\"value\": " + 0.00 + ",\n" + "\"jobs\": [\n";
+//
+//
+//        for(Task t : scheduledTasks) {
+//            if(t.getClass() == Job.class) json = json + "{" + (Job)t + "},";
+//        }
+//        json += "],";
+//        json += "setups: [";
+//        for(Task t : scheduledTasks) {
+//            if(t.getClass() == Setup.class) json = json + "{" + (Setup)t + "},";
+//        }
+//        json += "],";
+//        System.out.println(new Gson().toJson(json));
+//    }
 
 }
 
