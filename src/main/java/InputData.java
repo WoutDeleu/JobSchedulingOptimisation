@@ -29,7 +29,7 @@ public class InputData {
                 ", horizon=" + horizon +
                 "\n, jobs=" + jobs +
                 ", unavailability=" + unavailability +
-//                ", setups=" + setups +
+                ", setups=" + setups +
                 '}';
     }
 

@@ -1,4 +1,4 @@
-public class UnavailablePeriod {
+public class UnavailablePeriod extends Schedulable {
     private int start;
     private int end;
 

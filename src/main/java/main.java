@@ -11,6 +11,7 @@ public class main {
         try {
             String jsonString = Files.readString(Paths.get("datasets/TOY-20-10.json"));
             Gson gson = new Gson();
+            // Convert json to object from format: InputData
             InputData inputData = gson.fromJson(jsonString, InputData.class);
             System.out.println(inputData);
             int[][] matrix = inputData.getSetupMatrix();

@@ -1,6 +1,6 @@
 import com.google.gson.annotations.SerializedName;
 
-public class Job {
+public class Job extends Schedulable{
     private int id;
     private int duration;
     @SerializedName("release_date")
