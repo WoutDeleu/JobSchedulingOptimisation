@@ -31,7 +31,7 @@ public class main_Wout {
 
         // Write to JSON-file
         OutputData outputData = generateOutput("outputFile_Wout_Wannes_Matthieu", 100, scheduledTasks);
-        writeFile("solutions/sol-A-100-30.json", outputData);
+        writeFile("calculatedSolution/sol-A-100-30.json", outputData);
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
