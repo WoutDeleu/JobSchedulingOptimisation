@@ -1,8 +1,10 @@
 import com.google.gson.Gson;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,9 +29,9 @@ public class main_Wout {
         System.out.println("scheduled: \n"+scheduledTasks);
         System.out.println("waiting: \n"+waitingJobs);
 
-        // todo: write to json
         // Write to JSON-file
-        // writeFile("calculatedSolution/TEMPSOLUTION_A-100-30.json");
+        OutputData outputData = generateOutput("outputFile_Wout_Wannes_Matthieu", 100, scheduledTasks);
+        writeFile("solutions/sol-A-100-30.json", outputData);
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
@@ -63,6 +65,7 @@ public class main_Wout {
             scheduledTasks.removeLast();
             queueJob(j);
         }
+
 
         // todo : fill up holes
     }
@@ -154,12 +157,30 @@ public class main_Wout {
         InputData inputData = null;
         try {
             String jsonString = Files.readString(Paths.get(path));
-            System.out.println(jsonString);
             Gson gson = new Gson();
             inputData = gson.fromJson(jsonString, InputData.class);
         }
         catch (IOException e) {e.printStackTrace();}
         return inputData;
+    }
+
+    public static void writeFile(String path, OutputData outputData) {
+        try {
+            Gson gson = new Gson();
+            gson.toJson(outputData, new FileWriter(path));
+        }
+        catch (IOException e) {e.printStackTrace();}
+    }
+
+    public static OutputData generateOutput(String name, double score, LinkedList<Task> scheduledTasks) {
+        List<Job> jobs = new ArrayList<>();
+        List<Setup> setups = new ArrayList<>();
+        for (Task task : scheduledTasks) {
+            if (task.getClass()==Job.class) jobs.add((Job) task);
+            else if (task.getClass()==Setup.class) setups.add((Setup) task);
+            else throw new IllegalStateException("Item found that was neither a job nor a setup");
+        }
+        return new OutputData(name, score, jobs, setups);
     }
 
 //    private static void writeFile(String path) {
@@ -178,6 +199,8 @@ public class main_Wout {
 //        json += "],";
 //        System.out.println(new Gson().toJson(json));
 //    }
+
+
 
 }
 
