@@ -132,7 +132,7 @@ public class main_Wout {
         }
     }
 
-    // Plan job to waitingJobs or ScheduledTasks based on wheter it makes the deadline
+    // Plan job to waitingJobs or ScheduledTasks based on whether it makes the deadline
     public static void planJob(Job job, int startingDate) {
         if(job.makesDueDate(startingDate)) {
             job.setStartDate(startingDate);
