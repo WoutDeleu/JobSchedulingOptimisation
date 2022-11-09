@@ -1,6 +1,11 @@
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Task {
+    @Expose
+    @SerializedName("start")
     protected int startDate = -1;
     protected int finishDate = -1;
 

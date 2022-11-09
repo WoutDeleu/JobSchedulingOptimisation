@@ -1,7 +1,7 @@
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -9,46 +9,53 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class main_Wout {
+public class main {
 
     private static LinkedList<Task> scheduledTasks = new LinkedList<>();
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
+    private static List<Job> jobs = new LinkedList<>();
     private static int horizon;
     private static int currentBestValue;
+    private static double weight;
 
     public static void main(String[] args) {
         InputData inputData = readFile("datasets/A-100-30.json");
         SetupList setups = inputData.generateSetupList();
-        List<Job> jobs = inputData.getJobsSortedReleaseDate();
+        jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
         horizon = inputData.getHorizon();
+        weight = inputData.getWeightDuration();
 
         calculateInitialSolution(setups, jobs, unavailablePeriods);
 
-        System.out.println("Unavailable periods: \n"+unavailablePeriods);
-        System.out.println("scheduled: \n"+scheduledTasks);
-        System.out.println("waiting: \n"+waitingJobs);
+//        System.out.println("Unavailable periods: \n"+unavailablePeriods);
+//        System.out.println("scheduled: \n"+scheduledTasks);
+//        System.out.println("waiting: \n"+waitingJobs);
+
+        double cost = calculateCost();
 
         // Write to JSON-file
-        OutputData outputData = generateOutput("outputFile_Wout_Wannes_Matthieu", 100, scheduledTasks);
+        OutputData outputData = generateOutput("outputFile_Wout_Wannes_Matthieu", cost, scheduledTasks);
         writeFile("solutions/sol-A-100-30.json", outputData);
+
+
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
         boolean maxReached = false;
         for(Job job : jobs) {
-            if(!scheduledTasks.isEmpty()) {
+            if(!scheduledTasks.isEmpty()) { // In case of first job, we can't reach previous job
                 // Consistently check if horizon is reached
-                if(scheduledTasks.getLast().getFinishDate() == horizon || maxReached) {
+                Job previous = (Job) scheduledTasks.getLast();
+                if(previous.getFinishDate() == horizon || maxReached) {
                     queueJob(job);
                 }
-                else if(scheduledTasks.getLast().getFinishDate() > horizon ) {
-                    maxReached =true;
-                    Job j = (Job)scheduledTasks.getLast();
+                else if (previous.getFinishDate() > horizon) {
+                    maxReached = true;
                     // Remove last job + the linked setup
                     scheduledTasks.removeLast();
                     scheduledTasks.removeLast();
-                    queueJob(j);
+                    queueJob(previous);
                 }
                 else {
                     scheduleJob_FirstFit(job, setups, unavailablePeriods);
@@ -79,9 +86,12 @@ public class main_Wout {
             int startingDateSetup = previous.finishDate+1;
             Setup setup = setups.getSetup(((Job) previous).getId(), job.getId());
             int durationSetup = setup.getDuration();
-            for(UnavailablePeriod up : unavailablePeriods) {
+            for (UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the setup
-                if(startingDateSetup < up.getStartDate() && startingDateSetup + durationSetup < up.getStartDate()) break;
+                // Does setup lie before up?
+                if(startingDateSetup + durationSetup < up.getStartDate()) {
+                    break; // can be scheduled starting from this startDate
+                }
                 else {
                     startingDateSetup = Math.max(up.getFinishDate() + 1, startingDateSetup);
                 }
@@ -89,11 +99,11 @@ public class main_Wout {
 
             // Schedule job
             // Point from which job can be scheduled
-            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup +1);
+            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup + 1);
             int durationJob = job.getDuration();
             for(UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the job
-                if(startingDateJob < up.getStartDate() && startingDateJob + durationJob < up.getStartDate()) break;
+                if (startingDateJob < up.getStartDate() && startingDateJob + durationJob < up.getStartDate()) break;
                 else {
                     startingDateJob = Math.max(up.getFinishDate() + 1, startingDateJob);
                 }
@@ -143,15 +153,21 @@ public class main_Wout {
             queueJob(job);
         }
     }
+
     private static void queueJob(Job job) {
         job.setStartDate(-1);
         job.setFinishDate(-1);
         waitingJobs.addLast(job);
     }
 
-
-
-
+    public static double calculateCost() {
+        double cost = 0;
+        for (Job job : jobs) {
+            cost += job.getCost();
+        }
+        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate())*weight;
+        return (double) Math.round(cost * 100) / 100;
+    }
 
     public static InputData readFile(String path) {
         InputData inputData = null;
@@ -166,8 +182,11 @@ public class main_Wout {
 
     public static void writeFile(String path, OutputData outputData) {
         try {
-            Gson gson = new Gson();
-            gson.toJson(outputData, new FileWriter(path));
+            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+            String jsonString = gson.toJson(outputData);
+            PrintWriter printer = new PrintWriter(new FileWriter(path));
+            printer.write(jsonString);
+            printer.close();
         }
         catch (IOException e) {e.printStackTrace();}
     }
@@ -182,25 +201,6 @@ public class main_Wout {
         }
         return new OutputData(name, score, jobs, setups);
     }
-
-//    private static void writeFile(String path) {
-//        String json = "";
-//        json = json + "{ " + "\"name\": " + "\"TEMPSOLUTION_A-100-30.json\"\n" + "\"value\": " + 0.00 + ",\n" + "\"jobs\": [\n";
-//
-//
-//        for(Task t : scheduledTasks) {
-//            if(t.getClass() == Job.class) json = json + "{" + (Job)t + "},";
-//        }
-//        json += "],";
-//        json += "setups: [";
-//        for(Task t : scheduledTasks) {
-//            if(t.getClass() == Setup.class) json = json + "{" + (Setup)t + "},";
-//        }
-//        json += "],";
-//        System.out.println(new Gson().toJson(json));
-//    }
-
-
 
 }
 

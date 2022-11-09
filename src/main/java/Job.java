@@ -1,9 +1,11 @@
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Job extends Task{
+    @Expose
     private int id;
     private int duration;
     @SerializedName("release_date")
@@ -73,5 +75,16 @@ public class Job extends Task{
 
     public boolean makesDueDate(int startingTime) {
         return startingTime + duration <= dueDate;
+    }
+
+    public double getCost() {
+        double cost;
+        if(startDate<0) { // Job not scheduled
+            cost = rejectionPenalty;
+        }
+        else {
+            cost = earlinessPenalty*(dueDate - finishDate);
+        }
+        return cost;
     }
 }

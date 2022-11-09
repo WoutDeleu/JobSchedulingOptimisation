@@ -1,7 +1,13 @@
-public class Setup extends Task{
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
+public class Setup extends Task{
     private int duration;
+    @Expose
+    @SerializedName("to")
     private int job1;
+    @Expose
+    @SerializedName("from")
     private int job2;
 
     public Setup(int duration, int job1, int job2) {

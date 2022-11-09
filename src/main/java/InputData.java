@@ -42,6 +42,10 @@ public class InputData {
         return jobs;
     }
 
+    public double getWeightDuration() {
+        return weightDuration;
+    }
+
     public List<UnavailablePeriod> getUnavailablePeriods() {
         return unavailablePeriods;
     }
