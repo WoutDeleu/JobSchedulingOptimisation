@@ -33,13 +33,16 @@ public class main_Wout {
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
+        // Check if the horizon is reached
         boolean maxReached = false;
         for(Job job : jobs) {
             if(!scheduledTasks.isEmpty()) {
                 // Consistently check if horizon is reached
+                // If the last element finishes exactly on the horizon - queue everything
                 if(scheduledTasks.getLast().getFinishDate() == horizon || maxReached) {
                     queueJob(job);
                 }
+                // If the horizon is exceeded - remove last job + setup, and queue everything
                 else if(scheduledTasks.getLast().getFinishDate() > horizon ) {
                     maxReached =true;
                     Job j = (Job)scheduledTasks.getLast();
@@ -56,6 +59,7 @@ public class main_Wout {
                 scheduleJob_FirstFit(job, setups, unavailablePeriods);
             }
         }
+        // Check if the last added job doesn't exceed the horizon
         if(scheduledTasks.getLast().getFinishDate() > horizon) {
             Job j = (Job) scheduledTasks.getLast();
             // Remove last job + the linked setup
@@ -64,7 +68,7 @@ public class main_Wout {
             queueJob(j);
         }
 
-        // todo : fill up holes
+        // todo : fill up holes in between jobs
     }
 
     private static void scheduleJob_FirstFit(Job job, SetupList setups, List<UnavailablePeriod> unavailablePeriods) {
@@ -97,7 +101,7 @@ public class main_Wout {
             }
             planJobSetup(setup, startingDateSetup, job, startingDateJob);
         }
-        // If the list is empty, no need to take setup in account
+        // If the list is empty, no need to take setup in account -> no prior job
         else {
             // List is empty
             // Make sure job is scheduled in first possible slot (no unavailable periods)
@@ -107,6 +111,7 @@ public class main_Wout {
                 // Break: when slot is found to plan the job
                 if(startingDate < up.getStartDate() && startingDate + duration < up.getStartDate()) break;
                 else {
+                    // The current time from which the job can be scheduled: finishtime of the unavailable period
                     startingDate = up.getFinishDate() + 1;
                 }
             }
@@ -114,7 +119,9 @@ public class main_Wout {
         }
     }
 
+    // Finally schedule job together with the corresponding setup
     private static void planJobSetup(Setup setup, int startingDateSetup, Job job, int startingDateJob) {
+        // Check if it is possible to schedule the job/setup
         if(job.makesDueDate(startingDateJob)) {
             setup.setStartDate(startingDateSetup);
             setup.calculateFinishDate();
@@ -129,7 +136,7 @@ public class main_Wout {
         }
     }
 
-    // Plan job to waitingJobs or ScheduledTasks based on wheter it makes the deadline
+    // Plan job to waitingJobs or ScheduledTasks based on whether it makes the deadline
     public static void planJob(Job job, int startingDate) {
         if(job.makesDueDate(startingDate)) {
             job.setStartDate(startingDate);
