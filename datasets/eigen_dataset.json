@@ -1,6 +1,6 @@
 {
   "name": "eigen_dataset",
-  "weight_duration": 5.0,
+  "weight_duration": 10.0,
   "horizon": 1440,
   "jobs": [
     {
