@@ -19,7 +19,8 @@ public class main {
     private static double weight;
 
     public static void main(String[] args) {
-        InputData inputData = readFile("datasets/eigen_dataset.json");
+
+        InputData inputData = readFile("datasets/TOY-20-10.json");
         SetupList setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -36,8 +37,8 @@ public class main {
         System.out.println(cost);
 
         // Write to JSON-file
-        OutputData outputData = generateOutput("eigen_dataset", cost, scheduledTasks);
-        writeFile("calculatedSolution/eigen_dataset.json", outputData);
+        OutputData outputData = generateOutput("TOY-20-10", cost, scheduledTasks);
+        writeFile("calculatedSolution/sol-TOY-20-10.json", outputData);
 
 
     }
@@ -165,7 +166,7 @@ public class main {
         for (Job job : jobs) {
             cost += job.getCost();
         }
-        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate())*weight;
+        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
         return (double) Math.round(cost * 100) / 100;
     }
 

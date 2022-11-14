@@ -1,6 +1,6 @@
 {
   "name": "TOY-20-10",
-  "value": 9132.27,
+  "value": 9142.37,
   "jobs": [
     {
       "id": 12,
@@ -8,43 +8,43 @@
     },
     {
       "id": 6,
-      "start": 60
+      "start": 59
     },
     {
       "id": 3,
-      "start": 96
+      "start": 94
     },
     {
       "id": 13,
-      "start": 130
+      "start": 127
     },
     {
       "id": 11,
-      "start": 164
+      "start": 160
     },
     {
       "id": 14,
-      "start": 211
+      "start": 206
     },
     {
       "id": 17,
-      "start": 219
+      "start": 213
     },
     {
       "id": 15,
-      "start": 230
+      "start": 223
     },
     {
       "id": 1,
-      "start": 274
+      "start": 266
     },
     {
       "id": 9,
-      "start": 318
+      "start": 309
     },
     {
       "id": 2,
-      "start": 353
+      "start": 343
     },
     {
       "id": 19,
@@ -52,7 +52,7 @@
     },
     {
       "id": 18,
-      "start": 484
+      "start": 483
     },
     {
       "id": 5,
@@ -60,7 +60,7 @@
     },
     {
       "id": 0,
-      "start": 560
+      "start": 559
     },
     {
       "id": 8,
@@ -68,19 +68,19 @@
     },
     {
       "id": 7,
-      "start": 1039
+      "start": 1038
     },
     {
       "id": 10,
-      "start": 1085
+      "start": 1083
     },
     {
       "id": 16,
-      "start": 1109
+      "start": 1106
     },
     {
       "id": 4,
-      "start": 1168
+      "start": 1164
     }
   ],
   "setups": [
@@ -92,52 +92,52 @@
     {
       "from": 6,
       "to": 3,
-      "start": 89
+      "start": 88
     },
     {
       "from": 3,
       "to": 13,
-      "start": 125
+      "start": 123
     },
     {
       "from": 13,
       "to": 11,
-      "start": 158
+      "start": 155
     },
     {
       "from": 11,
       "to": 14,
-      "start": 206
+      "start": 202
     },
     {
       "from": 14,
       "to": 17,
-      "start": 215
+      "start": 210
     },
     {
       "from": 17,
       "to": 15,
-      "start": 223
+      "start": 217
     },
     {
       "from": 15,
       "to": 1,
-      "start": 271
+      "start": 264
     },
     {
       "from": 1,
       "to": 9,
-      "start": 313
+      "start": 305
     },
     {
       "from": 9,
       "to": 2,
-      "start": 347
+      "start": 338
     },
     {
       "from": 2,
       "to": 19,
-      "start": 382
+      "start": 372
     },
     {
       "from": 19,
@@ -147,7 +147,7 @@
     {
       "from": 18,
       "to": 5,
-      "start": 500
+      "start": 499
     },
     {
       "from": 5,
@@ -157,7 +157,7 @@
     {
       "from": 0,
       "to": 8,
-      "start": 598
+      "start": 597
     },
     {
       "from": 8,
@@ -167,17 +167,17 @@
     {
       "from": 7,
       "to": 10,
-      "start": 1080
+      "start": 1079
     },
     {
       "from": 10,
       "to": 16,
-      "start": 1105
+      "start": 1103
     },
     {
       "from": 16,
       "to": 4,
-      "start": 1162
+      "start": 1159
     }
   ]
 }
