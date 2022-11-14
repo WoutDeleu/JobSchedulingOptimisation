@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName;
 public class Setup extends Task{
     private int duration;
     @Expose
-    @SerializedName("to")
+    @SerializedName("from")
     private int job1;
     @Expose
-    @SerializedName("from")
+    @SerializedName("to")
     private int job2;
 
     public Setup(int duration, int job1, int job2) {

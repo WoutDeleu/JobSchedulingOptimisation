@@ -19,7 +19,7 @@ public class main {
     private static double weight;
 
     public static void main(String[] args) {
-        InputData inputData = readFile("datasets/TOY-20-.json");
+        InputData inputData = readFile("datasets/TOY-20-10.json");
         SetupList setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -29,14 +29,14 @@ public class main {
         calculateInitialSolution(setups, jobs, unavailablePeriods);
 
 //        System.out.println("Unavailable periods: \n"+unavailablePeriods);
-//        System.out.println("scheduled: \n"+scheduledTasks);
+        System.out.println("scheduled: \n"+scheduledTasks);
 //        System.out.println("waiting: \n"+waitingJobs);
 
         double cost = calculateCost();
 
         // Write to JSON-file
-        OutputData outputData = generateOutput("outputFile_Wout_Wannes_Matthieu", cost, scheduledTasks);
-        writeFile("solutions/sol-A-100-30.json", outputData);
+        OutputData outputData = generateOutput("TOY-20-10", cost, scheduledTasks);
+        writeFile("calculatedSolution/sol-TOY-20-10.json", outputData);
 
 
     }
