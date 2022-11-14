@@ -19,7 +19,7 @@ public class main {
     private static double weight;
 
     public static void main(String[] args) {
-        InputData inputData = readFile("datasets/A-100-30.json");
+        InputData inputData = readFile("datasets/TOY-20-.json");
         SetupList setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -182,7 +182,8 @@ public class main {
 
     public static void writeFile(String path, OutputData outputData) {
         try {
-            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+            //Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+            Gson gson = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
             String jsonString = gson.toJson(outputData);
             PrintWriter printer = new PrintWriter(new FileWriter(path));
             printer.write(jsonString);
