@@ -52,7 +52,7 @@ public class Job extends Task{
     }
 
     public void calculateFinishDate() {
-        this.finishDate = this.startDate + this.duration;
+        this.finishDate = this.startDate + this.duration - 1;
     }
 
 

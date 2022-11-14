@@ -47,7 +47,7 @@ public class main {
             if(!scheduledTasks.isEmpty()) { // In case of first job, we can't reach previous job
                 // Consistently check if horizon is reached
                 Job previous = (Job) scheduledTasks.getLast();
-                if(previous.getFinishDate() == horizon || maxReached) {
+                if (previous.getFinishDate() == horizon || maxReached) {
                     queueJob(job);
                 }
                 else if (previous.getFinishDate() > horizon) {
