@@ -1,6 +1,6 @@
 {
-  "name": "A-100-30",
-  "value": 9124.52,
+  "name": "TOY-20-10",
+  "value": 9137.37,
   "jobs": [
     {
       "id": 12,
@@ -8,43 +8,43 @@
     },
     {
       "id": 6,
-      "start": 61
+      "start": 59
     },
     {
       "id": 3,
-      "start": 98
+      "start": 94
     },
     {
       "id": 13,
-      "start": 133
+      "start": 127
     },
     {
       "id": 11,
-      "start": 168
+      "start": 160
     },
     {
       "id": 14,
-      "start": 216
+      "start": 206
     },
     {
       "id": 17,
-      "start": 225
+      "start": 213
     },
     {
       "id": 15,
-      "start": 237
+      "start": 223
     },
     {
       "id": 1,
-      "start": 282
+      "start": 266
     },
     {
       "id": 9,
-      "start": 327
+      "start": 309
     },
     {
       "id": 2,
-      "start": 363
+      "start": 343
     },
     {
       "id": 19,
@@ -52,7 +52,7 @@
     },
     {
       "id": 18,
-      "start": 485
+      "start": 483
     },
     {
       "id": 5,
@@ -60,7 +60,7 @@
     },
     {
       "id": 0,
-      "start": 561
+      "start": 559
     },
     {
       "id": 8,
@@ -68,116 +68,116 @@
     },
     {
       "id": 7,
-      "start": 1040
+      "start": 1038
     },
     {
       "id": 10,
-      "start": 1087
+      "start": 1083
     },
     {
       "id": 16,
-      "start": 1112
+      "start": 1106
     },
     {
       "id": 4,
-      "start": 1172
+      "start": 1164
     }
   ],
   "setups": [
     {
-      "to": 12,
-      "from": 6,
-      "start": 55
-    },
-    {
+      "from": 12,
       "to": 6,
-      "from": 3,
-      "start": 91
+      "start": 54
     },
     {
+      "from": 6,
       "to": 3,
-      "from": 13,
-      "start": 128
+      "start": 88
     },
     {
+      "from": 3,
       "to": 13,
-      "from": 11,
-      "start": 162
+      "start": 123
     },
     {
+      "from": 13,
       "to": 11,
-      "from": 14,
-      "start": 211
+      "start": 155
     },
     {
+      "from": 11,
       "to": 14,
-      "from": 17,
-      "start": 221
+      "start": 202
     },
     {
+      "from": 14,
       "to": 17,
-      "from": 15,
-      "start": 230
+      "start": 210
     },
     {
+      "from": 17,
       "to": 15,
-      "from": 1,
-      "start": 279
+      "start": 217
     },
     {
+      "from": 15,
       "to": 1,
-      "from": 9,
-      "start": 322
+      "start": 264
     },
     {
+      "from": 1,
       "to": 9,
-      "from": 2,
-      "start": 357
+      "start": 305
     },
     {
+      "from": 9,
       "to": 2,
-      "from": 19,
-      "start": 393
+      "start": 338
     },
     {
+      "from": 2,
       "to": 19,
-      "from": 18,
-      "start": 479
+      "start": 372
     },
     {
+      "from": 19,
       "to": 18,
-      "from": 5,
-      "start": 502
+      "start": 478
     },
     {
+      "from": 18,
       "to": 5,
-      "from": 0,
-      "start": 554
+      "start": 499
     },
     {
+      "from": 5,
       "to": 0,
-      "from": 8,
-      "start": 600
+      "start": 553
     },
     {
+      "from": 0,
       "to": 8,
-      "from": 7,
-      "start": 1037
+      "start": 597
     },
     {
+      "from": 8,
       "to": 7,
-      "from": 10,
-      "start": 1082
+      "start": 1036
     },
     {
+      "from": 7,
       "to": 10,
-      "from": 16,
-      "start": 1108
+      "start": 1079
     },
     {
+      "from": 10,
       "to": 16,
-      "from": 4,
-      "start": 1166
+      "start": 1103
+    },
+    {
+      "from": 16,
+      "to": 4,
+      "start": 1159
     }
   ]
 }

@@ -29,10 +29,11 @@ public class main {
         calculateInitialSolution(setups, jobs, unavailablePeriods);
 
 //        System.out.println("Unavailable periods: \n"+unavailablePeriods);
-        System.out.println("scheduled: \n"+scheduledTasks);
+//        System.out.println("scheduled: \n"+scheduledTasks);
 //        System.out.println("waiting: \n"+waitingJobs);
 
         double cost = calculateCost();
+        System.out.println(cost);
 
         // Write to JSON-file
         OutputData outputData = generateOutput("TOY-20-10", cost, scheduledTasks);
@@ -89,7 +90,7 @@ public class main {
             for (UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the setup
                 // Does setup lie before up?
-                if(startingDateSetup + durationSetup < up.getStartDate()) {
+                if(startingDateSetup + durationSetup-1 < up.getStartDate()) {
                     break; // can be scheduled starting from this startDate
                 }
                 else {
@@ -99,7 +100,7 @@ public class main {
 
             // Schedule job
             // Point from which job can be scheduled
-            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup + 1);
+            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup);
             int durationJob = job.getDuration();
             for(UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the job
@@ -118,7 +119,7 @@ public class main {
             int startingDate = job.getReleaseDate();
             for(UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the job
-                if(startingDate < up.getStartDate() && startingDate + duration < up.getStartDate()) break;
+                if(startingDate < up.getStartDate() && startingDate + duration-1 < up.getStartDate()) break;
                 else {
                     startingDate = up.getFinishDate() + 1;
                 }
@@ -155,8 +156,7 @@ public class main {
     }
 
     private static void queueJob(Job job) {
-        job.setStartDate(-1);
-        job.setFinishDate(-1);
+        job.setJobSkipped();
         waitingJobs.addLast(job);
     }
 

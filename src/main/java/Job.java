@@ -61,15 +61,14 @@ public class Job extends Task{
     public String toString() {
         return
                 "Job{" +
-//                "{" +
-                "id=" + id +
-                ", duration=" + duration +
-                ", releaseDate=" + releaseDate +
-                ", dueDate=" + dueDate +
-                ", earlinessPenalty=" + earlinessPenalty +
-                ", rejectionPenalty=" + rejectionPenalty +
-                ", start=" + startDate +
-                ", finishDate=" + finishDate +
+//                "id=" + id +
+//                ", duration=" + duration +
+//                ", releaseDate=" + releaseDate +
+//                ", dueDate=" + dueDate +
+//                ", earlinessPenalty=" + earlinessPenalty +
+//                ", rejectionPenalty=" + rejectionPenalty +
+//                ", start=" + startDate +
+//                ", finishDate=" + finishDate +
                 "}, \n";
     }
 
@@ -86,5 +85,10 @@ public class Job extends Task{
             cost = earlinessPenalty*(dueDate - finishDate);
         }
         return cost;
+    }
+
+    public void setJobSkipped() {
+        finishDate = -1;
+        startDate = -1;
     }
 }
