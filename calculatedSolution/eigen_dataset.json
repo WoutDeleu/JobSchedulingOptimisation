@@ -1,0 +1,30 @@
+{
+  "name": "eigen_dataset",
+  "value": 2602.01,
+  "jobs": [
+    {
+      "id": 1,
+      "start": 232
+    },
+    {
+      "id": 2,
+      "start": 309
+    },
+    {
+      "id": 0,
+      "start": 552
+    }
+  ],
+  "setups": [
+    {
+      "from": 1,
+      "to": 2,
+      "start": 271
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "start": 338
+    }
+  ]
+}
