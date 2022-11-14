@@ -14,6 +14,7 @@ public class main {
     private static LinkedList<Task> scheduledTasks = new LinkedList<>();
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
     private static List<Job> jobs = new LinkedList<>();
+    private static SetupList setups;
     private static int horizon;
     private static int currentBestValue;
     private static double weight;
@@ -21,7 +22,7 @@ public class main {
     public static void main(String[] args) {
 
         InputData inputData = readFile("datasets/TOY-20-10.json");
-        SetupList setups = inputData.generateSetupList();
+        setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
         horizon = inputData.getHorizon();
@@ -74,7 +75,6 @@ public class main {
             scheduledTasks.removeLast();
             queueJob(j);
         }
-
 
         // todo : fill up holes
     }
@@ -204,6 +204,49 @@ public class main {
         return new OutputData(name, score, jobs, setups);
     }
 
+    public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) {
+        for(int i=index; i<scheduledTasks.size(); i++) {
+            Task t = scheduledTasks.get(i);
+            if(t.getStartDate() > unavailablePeriods.get(unavailablePeriods.size()-1).getFinishDate()){
+                break;
+            }
+            /*if(t.getClass()==Job.class){
+                Job job = (Job) t;
+                if(job.getStartDate()<job.getReleaseDate()){
+                    scheduledTasks.remove(job);
+                }
+            }*/
+            for(UnavailablePeriod u : unavailablePeriods) {
+                if((u.getStartDate()<=t.getStartDate() && t.getStartDate()<=u.getFinishDate()) || (u.getStartDate()<=t.getFinishDate() && t.getFinishDate()<=u.getFinishDate())) {
+                    if(t.getClass()==Job.class){
+                        // remove job and setup necessary for that job
+                        scheduledTasks.remove(i);
+                        scheduledTasks.remove(i-1);
+
+                        Job j = (Job) scheduledTasks.get(i-2);
+                        Setup s = (Setup) scheduledTasks.get(i+1);
+                        scheduledTasks.remove(s);
+                        Setup s2 = setups.getSetup(j.getId(), s.getJob2());
+                        scheduledTasks.add(i+1, s2);
+                        //break;
+                    }
+                    if(t.getClass()==Setup.class) {
+                        //remove setup in unavailable period and job after setup in unavailable period
+                        // + replace setup remaining after job after setup in unavailable period
+                        scheduledTasks.remove(i);
+                        scheduledTasks.remove(i+1);
+
+                        Job j = (Job) scheduledTasks.get(i-1);
+                        // Setup s = (Setup) scheduledTasks.get(i-2);
+                        Setup s = (Setup) scheduledTasks.get(i+2);
+                        scheduledTasks.remove(s);
+                        Setup s2 = setups.getSetup(j.getId(), s.getJob2());
+                        scheduledTasks.add(i+2, s2);
+                    }
+                }
+            }
+        }
+    }
 }
 
 
