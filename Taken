@@ -1,4 +1,3 @@
-(0. unavailable periods = UP) => ?
 0. oplossingen indienen - Wo
 1. functie die alle starttijden berekent - Wo
 2. 2 basisoperaties implementeren!! (based on those, expand functionality) - Wo/Ma
@@ -15,8 +14,8 @@
     3.2. calculateStartTimes()
         3.2.1 bereken alle starttijden voor de objecten in de linked list
         3.2.2 smijt die eruit die overlappen met unavailable periods
-        3.2.2 feasableInserts()
-              Enkel nog gaten opvullen met jobs die feasable kunnen gepland worden => starttijden moeten niet herberekend worden
+        3.2.2 feasibleInserts()
+              Enkel nog gaten opvullen met jobs die feasible kunnen gepland worden => starttijden moeten niet herberekend worden
               - bij hill climbing om de x keer => parameter
               - bij steepest descent elke iteratie
 
@@ -31,6 +30,6 @@ Extra:
 - in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte
 - op basis van de lengte van wachtlijst meer inserts of meer deletes gaan doorvoeren
 - 3-opt operatie
-- ruin en recreate (ruin tussen twee UP's?)
+- ruin en recreate (ruin tussen twee UP' s?)
 - zowel steepest decent als hill climbing proberen en zien wat beste resultaat geeft
         => niet veel aan te passen in de code om te wisselen tussen de twee
