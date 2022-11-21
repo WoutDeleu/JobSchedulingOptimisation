@@ -18,9 +18,12 @@ public class InputData {
     @SerializedName("unavailability")
     private ArrayList<UnavailablePeriod> unavailablePeriods = new ArrayList<>();
     private ArrayList<int[]> setups = new ArrayList<>();
+
+
     public SetupList generateSetupList() {
         return new SetupList(setups);
     }
+
     public int[][] getSetupMatrix() {
         int N = jobs.size();
         int[][] matrix = new int[N][N];

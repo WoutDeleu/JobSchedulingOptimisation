@@ -1,13 +1,36 @@
-(0. unavailable periods)
+(0. unavailable periods = UP) => ?
 0. oplossingen indienen - Wo
-1. functie die alle startijden berekent - Wo
+1. functie die alle starttijden berekent - Wo
 2. 2 basisoperaties implementeren!! (based on those, expand functionality) - Wo/Ma
-3. Local Search
-    3.1. x aantal basisoperaties
-    3.2. Make feasible & calculate starttimes (delete those who don't fit) (Calculate only section which changed)
-        3.2.1. Only for section that is changed
-        3.2.2. hill climbing: insertion feasible (om de 100 keer?)
-    3.3. Calculate cost: (as efficient as possible)
-    3.4. Go back (with margin)
+    - algemeen: zoveel mogelijk herbruikbare zaken opsplitsen in afzonderlijke functies
+    - enkel de operatie zelf, nog niet nadenken over "goede keuzes" => zie hieronder
+        - insert
+        - delete
+        - swap : volgt uit 2 bovenstaande
 
-Extra: counters to see with margins
+3. Local Search
+    3.1. x aantal basisoperaties => parameter om mee te spelen
+        - operaties "random" gekozen, maar wel met een redenering erachter (GOEDE KEUZES) => niet eerste met laatste swappen
+
+    3.2. calculateStartTimes()
+        3.2.1 bereken alle starttijden voor de objecten in de linked list
+        3.2.2 smijt die eruit die overlappen met unavailable periods
+        3.2.2 feasableInserts()
+              Enkel nog gaten opvullen met jobs die feasable kunnen gepland worden => starttijden moeten niet herberekend worden
+              - bij hill climbing om de x keer => parameter
+              - bij steepest descent elke iteratie
+
+    3.3. Calculate cost: (as efficient as possible)
+    3.4. Undo/Do
+        3.4.1 origineel gewoon enkel uitvoeren als de score beter wordt
+        3.4.2 Als we lang op plateau zitten (niet verbeteren) toelaten om even een slechtere oplossing door te voeren
+              om zo terug nieuwe opties te kunnen verkennen
+
+Extra:
+- counters to see with margins
+- in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte
+- op basis van de lengte van wachtlijst meer inserts of meer deletes gaan doorvoeren
+- 3-opt operatie
+- ruin en recreate (ruin tussen twee UP's?)
+- zowel steepest decent als hill climbing proberen en zien wat beste resultaat geeft
+        => niet veel aan te passen in de code om te wisselen tussen de twee

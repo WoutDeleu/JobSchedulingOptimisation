@@ -45,11 +45,11 @@ public class Setup extends Task{
     @Override
     public String toString() {
         return "Setup{" +
-//                "duration=" + duration +
-//                ", from=" + job1 +
-//                ", to=" + job2 +
-//                ", start=" + startDate +
-//                ", finishDate=" + finishDate +
+                "duration=" + duration +
+                ", from=" + job1 +
+                ", to=" + job2 +
+                ", start=" + startDate +
+                ", finishDate=" + finishDate +
                 "} \n";
     }
 }

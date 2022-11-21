@@ -182,7 +182,6 @@ public class main {
 
     public static void writeFile(String path, OutputData outputData) {
         try {
-            //Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
             Gson gson = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
             String jsonString = gson.toJson(outputData);
             PrintWriter printer = new PrintWriter(new FileWriter(path));
