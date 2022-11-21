@@ -1,7 +1,15 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InputData {
@@ -19,6 +27,17 @@ public class InputData {
     private ArrayList<UnavailablePeriod> unavailablePeriods = new ArrayList<>();
     private ArrayList<int[]> setups = new ArrayList<>();
 
+
+    public static InputData readFile(String path) {
+        InputData inputData = null;
+        try {
+            String jsonString = Files.readString(Paths.get(path));
+            Gson gson = new Gson();
+            inputData = gson.fromJson(jsonString, InputData.class);
+        }
+        catch (IOException e) {e.printStackTrace();}
+        return inputData;
+    }
 
     public SetupList generateSetupList() {
         return new SetupList(setups);
@@ -62,6 +81,28 @@ public class InputData {
                 ", unavailability=" + unavailablePeriods +
 //                ", setups=" + setups +
                 '}';
+    }
+
+    public static void writeFile(String path, OutputData outputData) {
+        try {
+            Gson gson = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
+            String jsonString = gson.toJson(outputData);
+            PrintWriter printer = new PrintWriter(new FileWriter(path));
+            printer.write(jsonString);
+            printer.close();
+        }
+        catch (IOException e) {e.printStackTrace();}
+    }
+
+    public static OutputData generateOutput(String name, double score, LinkedList<Task> scheduledTasks) {
+        List<Job> jobs = new ArrayList<>();
+        List<Setup> setups = new ArrayList<>();
+        for (Task task : scheduledTasks) {
+            if (task.getClass()==Job.class) jobs.add((Job) task);
+            else if (task.getClass()==Setup.class) setups.add((Setup) task);
+            else throw new IllegalStateException("Item found that was neither a job nor a setup");
+        }
+        return new OutputData(name, score, jobs, setups);
     }
 
 }

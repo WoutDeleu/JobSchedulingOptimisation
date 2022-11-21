@@ -62,14 +62,14 @@ public class Job extends Task{
         return
                 "Job{" +
                 "id=" + id +
-                ", duration=" + duration +
-                ", releaseDate=" + releaseDate +
-                ", dueDate=" + dueDate +
-                ", earlinessPenalty=" + earlinessPenalty +
-                ", rejectionPenalty=" + rejectionPenalty +
-                ", start=" + startDate +
-                ", finishDate=" + finishDate +
-                "}, \n";
+//                ", duration=" + duration +
+//                ", releaseDate=" + releaseDate +
+//                ", dueDate=" + dueDate +
+//                ", earlinessPenalty=" + earlinessPenalty +
+//                ", rejectionPenalty=" + rejectionPenalty +
+//                ", start=" + startDate +
+//                ", finishDate=" + finishDate +
+                "}";
     }
 
     public boolean makesDueDate(int startingTime) {

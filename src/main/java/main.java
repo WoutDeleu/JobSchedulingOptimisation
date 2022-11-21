@@ -1,11 +1,3 @@
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.rmi.Remote;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,9 +12,9 @@ public class main {
     private static int currentBestValue;
     private static double weight;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        InputData inputData = readFile("datasets/TOY-20-10.json");
+        InputData inputData = InputData.readFile("datasets/eigen_dataset.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -31,18 +23,64 @@ public class main {
 
         calculateInitialSolution(setups, jobs, unavailablePeriods);
 
-//        System.out.println("Unavailable periods: \n"+unavailablePeriods);
-//        System.out.println("scheduled: \n"+scheduledTasks);
-//        System.out.println("waiting: \n"+waitingJobs);
-
         double cost = calculateCost();
-        System.out.println(cost);
+        System.out.println("Cost: " + cost);
 
+/**
         // Write to JSON-file
-        OutputData outputData = generateOutput("TOY-20-10", cost, scheduledTasks);
-        writeFile("calculatedSolution/sol-TOY-20-10.json", outputData);
+        OutputData outputData = InputData.generateOutput("TOY-20-10", cost, scheduledTasks);
+        InputData.writeFile("calculatedSolution/sol_TOY-20-10.json", outputData);
+ **/
+
+        illustrateBasicFunctions();
     }
 
+    /**Funciton to illustrate the 3 basic operations**/
+    public static void illustrateBasicFunctions() throws Exception {
+        System.out.println("****************************Delete job************************************");
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+        operation_deleteJob(2);
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+
+        System.out.println("****************************Delete Setup************************************");
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+        operation_deleteSetup(1);
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+
+        System.out.println("****************************Insert************************************");
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+        operation_insertJob(1, jobs.get(1));
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+
+        System.out.println("****************************SWAPt************************************");
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+        operation_swap2(0, 2);
+        for(int i = 0; i < scheduledTasks.size(); i++){
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println();
+    }
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
         boolean maxReached = false;
         for(Job job : jobs) {
@@ -156,7 +194,7 @@ public class main {
     }
 
     private static void queueJob(Job job) {
-        job.setJobSkipped();
+//        job.setJobSkipped();
         waitingJobs.addLast(job);
     }
 
@@ -169,42 +207,9 @@ public class main {
         return (double) Math.round(cost * 100) / 100;
     }
 
-    public static InputData readFile(String path) {
-        InputData inputData = null;
-        try {
-            String jsonString = Files.readString(Paths.get(path));
-            Gson gson = new Gson();
-            inputData = gson.fromJson(jsonString, InputData.class);
-        }
-        catch (IOException e) {e.printStackTrace();}
-        return inputData;
-    }
-
-    public static void writeFile(String path, OutputData outputData) {
-        try {
-            Gson gson = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
-            String jsonString = gson.toJson(outputData);
-            PrintWriter printer = new PrintWriter(new FileWriter(path));
-            printer.write(jsonString);
-            printer.close();
-        }
-        catch (IOException e) {e.printStackTrace();}
-    }
-
-    public static OutputData generateOutput(String name, double score, LinkedList<Task> scheduledTasks) {
-        List<Job> jobs = new ArrayList<>();
-        List<Setup> setups = new ArrayList<>();
-        for (Task task : scheduledTasks) {
-            if (task.getClass()==Job.class) jobs.add((Job) task);
-            else if (task.getClass()==Setup.class) setups.add((Setup) task);
-            else throw new IllegalStateException("Item found that was neither a job nor a setup");
-        }
-        return new OutputData(name, score, jobs, setups);
-    }
-
     // Runs over schedule
     // Removes scheduled task which clash with the unavailability periods
-    public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) {
+    public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) throws Exception {
         for(int i=index; i<scheduledTasks.size(); i++) {
             Task t = scheduledTasks.get(i);
             // If task is scheduled after ALL the unavailable periods
@@ -224,35 +229,99 @@ public class main {
                 // Remark: links must be restored (no dangling links)
                 if((t.getStartDate() >= u.getStartDate() && t.getStartDate() <= u.getFinishDate()) || (u.getStartDate()<=t.getFinishDate() && t.getFinishDate()<=u.getFinishDate())) {
                     if(t.getClass()==Job.class){
-                        // remove job and setup necessary for that job
-                        scheduledTasks.remove(i);
-                        scheduledTasks.remove(i-1);
-
-                        // reconnect links
-                        Job j = (Job) scheduledTasks.get(i-2);
-                        Setup s = (Setup) scheduledTasks.get(i+1);
-                        scheduledTasks.remove(s);
-                        Setup s2 = setups.getSetup(j.getId(), s.getJob2());
-                        scheduledTasks.add(i+1, s2);
-                        //break;
+                        operation_deleteJob(i);
                     }
                     if(t.getClass()==Setup.class) {
-                        //remove setup in unavailable period and job after setup in unavailable period
-                        // + replace setup remaining after job after setup in unavailable period
-                        scheduledTasks.remove(i);
-                        scheduledTasks.remove(i+1);
-
-                        // reconnect links
-                        Job j = (Job) scheduledTasks.get(i-1);
-                        // Setup s = (Setup) scheduledTasks.get(i-2);
-                        Setup s = (Setup) scheduledTasks.get(i+2);
-                        scheduledTasks.remove(s);
-                        Setup s2 = setups.getSetup(j.getId(), s.getJob2());
-                        scheduledTasks.add(i+2, s2);
+                        operation_deleteSetup(i);
                     }
                 }
             }
         }
+    }
+    /**Deze functie is enkel en alleen om de makefeasable goe te krijgen...**/
+    public static void operation_deleteSetup(int index) throws Exception {
+        Task task = scheduledTasks.get(index);
+        if(task.getClass()==Job.class) {
+            throw new Exception("Can't remove a job with an operation: delete setup");
+        }
+        if(task.getClass()==Setup.class) {
+            //remove setup in unavailable period and job after setup in unavailable period
+            // + replace setup remaining after job after setup in unavailable period
+            scheduledTasks.remove(index);
+            scheduledTasks.remove(index);
+
+            // reconnect links
+            Job j = (Job) scheduledTasks.get(index-1);
+            // Setup s = (Setup) scheduledTasks.get(i-2);
+            ((Setup) scheduledTasks.get(index)).setJob1(j.getId());
+        }
+    }
+
+    public static void operation_deleteJob(int index) throws Exception {
+        Task task = scheduledTasks.get(index);
+        if(task.getClass()==Job.class) {
+            // remove job and setup necessary for that job
+            if(index > 0) {
+                scheduledTasks.remove(index);
+                scheduledTasks.remove(index-1);
+
+                // reconnect links
+                if(index  < scheduledTasks.size()) {
+                    Job j = (Job) scheduledTasks.get(index - 2);
+                    ((Setup) scheduledTasks.get(index - 1)).setJob1(j.getId());
+                }
+            }
+            else {
+                scheduledTasks.remove(index);
+                scheduledTasks.remove(index);
+            }
+        }
+        else if(task.getClass()==Setup.class) {
+            throw new Exception("Can't remove a setup with an operation: delete job");
+        }
+    }
+
+    public static void operation_insertJob(int index, Job job) throws Exception {
+        if (index <= scheduledTasks.size()) scheduledTasks.add(index, job);
+        else {
+            scheduledTasks.addLast(job);
+            index = scheduledTasks.indexOf(job);
+        }
+        Task pre = null, nex = null;
+        if (index > 0) pre = scheduledTasks.get(index - 1);
+        if (scheduledTasks.size() > index+1) nex = scheduledTasks.get(index + 1);
+
+        // Determine wether job is scheduled before or after setup
+        // If there was no previous job, no need to add setup before
+        if(pre != null) {
+            if (pre.getClass() == Setup.class) {
+                // scheduled right after setup
+                // adjust previous setup to current job
+                ((Setup) pre).setJob2(job.getId());
+            }
+            else scheduledTasks.add(index, setups.getSetup((((Job) pre).getId()), job.getId()));
+
+        }
+        if(nex != null) {
+            if (nex.getClass() == Setup.class) {
+                ((Setup) nex).setJob1(job.getId());
+            }
+            else scheduledTasks.add(index + 1, setups.getSetup(job.getId(), ((Job) nex).getId()));
+        }
+    }
+    public static void operation_swap2(int i1, int i2) throws Exception {
+        int index1 = Math.min(i1, i2);
+        int index2 = Math.max(i1, i2);
+
+        Job job1 = (Job) scheduledTasks.get(index1);
+        Job job2 = (Job) scheduledTasks.get(index2);
+
+        operation_deleteJob(index2);
+        operation_deleteJob(index1);
+
+        operation_insertJob(index1, job2);
+        operation_insertJob(index2, job1);
+
     }
 }
 

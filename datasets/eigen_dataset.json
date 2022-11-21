@@ -26,6 +26,14 @@
       "due_date": 1092,
       "earliness_penalty": 0.62,
       "rejection_penalty": 2337.4
+    },
+    {
+      "id": 3,
+      "duration": 29,
+      "release_date": 309,
+      "due_date": 1092,
+      "earliness_penalty": 0.62,
+      "rejection_penalty": 2337.4
     }
     ],
   "unavailability": [
