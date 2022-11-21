@@ -41,8 +41,6 @@ public class main {
         // Write to JSON-file
         OutputData outputData = generateOutput("TOY-20-10", cost, scheduledTasks);
         writeFile("calculatedSolution/sol-TOY-20-10.json", outputData);
-
-
     }
 
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {

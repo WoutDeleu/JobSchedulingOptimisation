@@ -291,16 +291,39 @@ class Validator:
 
         return valid
 
+    def validate_setup_sequence(self, solution):
+        valid = True
+        checked = set()
+        i = solution.jobs[0].id
+        for x in range(1, len(solution.jobs)):
+            j = solution.jobs[x].id
+            if not tuple([i,j]) in solution.setups:
+                self.add_error("Setup (%d -> %d) should exist but I could not find it in the solution file." % (i, j))
+                valid = False
+            checked.add(tuple([i,j]))
+            i = j
+
+        for sij in solution.setups.keys():
+            if not sij in checked:
+                self.add_error("Setup (%d -> %d) has been scheduled but it is never used in the solution." % (sij[0], sij[1]))
+                valid = False
+
+        return valid
 
     def validate_solution(self, instance, solution):
         if instance.name != solution.inst_name:
             self.add_error("Instance name '%s' and solution '%s' differ. Are you trying to validate a solution of another instance?" % (instance.name, solution.inst_name))
             return False
 
+        valid = self.validate_setup_sequence(solution)
+        if not valid:
+            self.add_error("Error in setup sequence (see messages above). I stopped validation early. There could be additional errors which I have not processed.")
+            return valid
+
         valid = self.validate_sequence(instance, solution)
 
         if abs(solution.cost() - solution.of_read) > 0.009:
-            self.add_error("Solution cost reported is %.2f but I computed %.2f" % (solution.of_read, solution.cost()))
+            self.add_error("Solution cost reported is %.2f but I computed %.2f (rejection: %.2f + earliness: %.2f + duration: %.2f)" % (solution.of_read, solution.cost(), solution.pen_rejec, solution.pen_earl, solution.pen_dur))
             valid = False
 
         return valid

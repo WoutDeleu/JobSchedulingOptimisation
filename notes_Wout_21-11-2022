@@ -1,7 +1,8 @@
-Moeten we nu niet de startingdates and finish dates uit elkaar halen?
-    => Nu is initiële oplossing gebaseerd op deze dates (vanaf dan wordt gerekend)....
-    => Ook de feasible is daarop gebaseerd
-    => Solution: recursieve - die als input heeft (verwachte) finish date van de vorig
-
-@Matthieu: gij houdt dus geen rekening meer met de startdates enz?
-Nut van de feasible oplossing?
+(0. unavailable periods)
+1. functie die alle startijden berekent
+2. 3 basisoperaties implementeren!!
+3. Local Search
+    3.1. x aantal basisoperaties
+    3.2. Make feasible & calculate starttimes (delete those who don't fit)
+        3.2.1. hill climbing: insertion feasible (om de 100 keer?)
+    3.3. Calculate cost: (as efficient as possible)
