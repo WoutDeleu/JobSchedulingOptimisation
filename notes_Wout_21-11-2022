@@ -1,8 +1,13 @@
 (0. unavailable periods)
-1. functie die alle startijden berekent
-2. 3 basisoperaties implementeren!!
+0. oplossingen indienen - Wo
+1. functie die alle startijden berekent - Wo
+2. 2 basisoperaties implementeren!! (based on those, expand functionality) - Wo/Ma
 3. Local Search
     3.1. x aantal basisoperaties
-    3.2. Make feasible & calculate starttimes (delete those who don't fit)
-        3.2.1. hill climbing: insertion feasible (om de 100 keer?)
+    3.2. Make feasible & calculate starttimes (delete those who don't fit) (Calculate only section which changed)
+        3.2.1. Only for section that is changed
+        3.2.2. hill climbing: insertion feasible (om de 100 keer?)
     3.3. Calculate cost: (as efficient as possible)
+    3.4. Go back (with margin)
+
+Extra: counters to see with margins
