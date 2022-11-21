@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,11 +62,11 @@ public class main {
                     queueJob(previous);
                 }
                 else {
-                    scheduleJob_FirstFit(job, setups, unavailablePeriods);
+                    scheduleJob_EndOfLine(job, setups, unavailablePeriods);
                 }
             }
             else {
-                scheduleJob_FirstFit(job, setups, unavailablePeriods);
+                scheduleJob_EndOfLine(job, setups, unavailablePeriods);
             }
         }
         if(scheduledTasks.getLast().getFinishDate() > horizon) {
@@ -79,7 +80,7 @@ public class main {
         // todo : fill up holes
     }
 
-    private static void scheduleJob_FirstFit(Job job, SetupList setups, List<UnavailablePeriod> unavailablePeriods) {
+    private static void scheduleJob_EndOfLine(Job job, SetupList setups, List<UnavailablePeriod> unavailablePeriods) {
         // If scheduled is not empty - there needs to be a setup
         if(!scheduledTasks.isEmpty()) {
             Task previous = scheduledTasks.getLast();
@@ -204,25 +205,33 @@ public class main {
         return new OutputData(name, score, jobs, setups);
     }
 
+    // Runs over schedule
+    // Removes scheduled task which clash with the unavailability periods
     public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) {
         for(int i=index; i<scheduledTasks.size(); i++) {
             Task t = scheduledTasks.get(i);
+            // If task is scheduled after ALL the unavailable periods
             if(t.getStartDate() > unavailablePeriods.get(unavailablePeriods.size()-1).getFinishDate()){
                 break;
             }
-            /*if(t.getClass()==Job.class){
+            /* if(t.getClass()==Job.class){
                 Job job = (Job) t;
                 if(job.getStartDate()<job.getReleaseDate()){
                     scheduledTasks.remove(job);
                 }
             }*/
+
             for(UnavailablePeriod u : unavailablePeriods) {
-                if((u.getStartDate()<=t.getStartDate() && t.getStartDate()<=u.getFinishDate()) || (u.getStartDate()<=t.getFinishDate() && t.getFinishDate()<=u.getFinishDate())) {
+                // If task of task is executed during unavailability period
+                // It needs to be taken out (T1 -> S12 -> T2 -> S23 -> T3 ->) => (T1 -> S13 -> T3)
+                // Remark: links must be restored (no dangling links)
+                if((t.getStartDate() >= u.getStartDate() && t.getStartDate() <= u.getFinishDate()) || (u.getStartDate()<=t.getFinishDate() && t.getFinishDate()<=u.getFinishDate())) {
                     if(t.getClass()==Job.class){
                         // remove job and setup necessary for that job
                         scheduledTasks.remove(i);
                         scheduledTasks.remove(i-1);
 
+                        // reconnect links
                         Job j = (Job) scheduledTasks.get(i-2);
                         Setup s = (Setup) scheduledTasks.get(i+1);
                         scheduledTasks.remove(s);
@@ -236,6 +245,7 @@ public class main {
                         scheduledTasks.remove(i);
                         scheduledTasks.remove(i+1);
 
+                        // reconnect links
                         Job j = (Job) scheduledTasks.get(i-1);
                         // Setup s = (Setup) scheduledTasks.get(i-2);
                         Setup s = (Setup) scheduledTasks.get(i+2);
@@ -248,5 +258,6 @@ public class main {
         }
     }
 }
+
 
 

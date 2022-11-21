@@ -1,0 +1,7 @@
+Moeten we nu niet de startingdates and finish dates uit elkaar halen?
+    => Nu is initiële oplossing gebaseerd op deze dates (vanaf dan wordt gerekend)....
+    => Ook de feasible is daarop gebaseerd
+    => Solution: recursieve - die als input heeft (verwachte) finish date van de vorig
+
+@Matthieu: gij houdt dus geen rekening meer met de startdates enz?
+Nut van de feasible oplossing?
