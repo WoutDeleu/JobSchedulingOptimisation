@@ -1,6 +1,7 @@
 import java.sql.SQLOutput;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 
 public class main {
@@ -35,8 +36,6 @@ public class main {
 
 
     }
-
-
     /*********************************** TESTING ***********************************/
 
     public static void illustrateBasicFunctions() throws Exception {
@@ -325,7 +324,60 @@ public class main {
     }
 
     /*********************************** LOCAL SEARCH ***********************************/
+    public static void localSearch(int x, List<UnavailablePeriod> unavailablePeriods) {
+        // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
+        // and validate if the new scheduling is acceptable / better than the original scheduling
+        int i=0;
+        LinkedList<Task> scheduledTasksCopy = new LinkedList<>(scheduledTasks);
+        double lastCost = Double.MAX_VALUE;
+        while(true) {
+            if(i%x==0){
+                calculateStartTimes();
+                makeFeasibleUPs(0, unavailablePeriods);
 
+                ///////// hier nog feasible inserts functie invoegen
+
+                double tempCost = calculateCost();
+                if(lastCost>tempCost) {
+                    scheduledTasksCopy = new LinkedList<>(scheduledTasks);
+                    lastCost=tempCost;
+                }
+                else{
+                    scheduledTasks = new LinkedList<>(scheduledTasksCopy);
+                }
+
+            }
+            executeRandomBasicOperation();
+            i++;
+
+        }
+    }
+
+    //function to execute one of the basic operations on the temporary solution
+    public static void executeRandomBasicOperation(){
+        Random operation = new Random();
+        int jobIndex = 0;
+        Random job = new Random();
+        switch(operation.nextInt(3)){
+            case 0:
+                jobIndex = job.nextInt(scheduledTasks.size());
+                if(jobIndex%2==1) jobIndex++;
+                operation_deleteJob(jobIndex);
+                break;
+            case 1:
+                jobIndex = job.nextInt(waitingJobs.size());
+                operation_insertJob(jobIndex, waitingJobs.get(jobIndex));
+                break;
+            case 2:
+                jobIndex = job.nextInt(scheduledTasks.size());
+                if(jobIndex%2 == 1) jobIndex++;
+                int job2 = job.nextInt(scheduledTasks.size());
+                if (job2%2 == 1) job2++;
+                if (job2 == jobIndex) job2 = job2+2;
+                operation_swapJobs(jobIndex, job2);
+                break;
+        }
+    }
 
     // Removes scheduled task which clash with the unavailability periods
     public static void makeFeasibleUPs(int start, List<UnavailablePeriod> unavailablePeriods) {
@@ -347,6 +399,34 @@ public class main {
         return (double) Math.round(cost * 100) / 100;
     }
 
+    public static void calculateStartTimes() {
+        int timer=0;
+        for (Task t: scheduledTasks) {
+            t.setStartDate(timer);
+            int duration = -1;
+            if(t.getClass()==Job.class){
+                Job j = (Job) t;
+                if(checkJobFeasible(j)) duration = j.getDuration();
+            }
+            if (t.getClass()==Setup.class){
+                Setup s = (Setup) t;
+                duration = s.getDuration();
+            }
+            if(duration >0){
+                timer+=duration;
+                t.setFinishDate(timer);
+            }
+            else {
+                operation_deleteJob(scheduledTasks.indexOf(t));
+            }
+
+        }
+    }
+
+    public static boolean checkJobFeasible(Job job){
+        return job.getReleaseDate() > job.getStartDate() + job.getDuration();
+    }
+
 
     /*********************************** I/O ***********************************/
 
@@ -362,9 +442,6 @@ public class main {
         }
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
-
-
-
 
 
 }

@@ -23,6 +23,10 @@ public class Task {
 
     public void setStartDate(int startDate) { this.startDate = startDate; }
 
+    public void setFinishDate(int finishDate) {
+        this.finishDate = finishDate;
+    }
+
     // Returns true if the job doesn't overlap with any unavailable periods
     public boolean isFeasibleUPs(List<UnavailablePeriod> unavailablePeriods) {
         assert startDate >= 0 : "startDate not set";
