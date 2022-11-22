@@ -16,7 +16,8 @@ public class main {
 
     public static void main(String[] args) throws Exception {
 
-        InputData inputData = InputData.readFile("datasets/eigen_dataset.json");
+//        InputData inputData = InputData.readFile("datasets/eigen_dataset.json");
+        InputData inputData = InputData.readFile("datasets/A-100-30.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
@@ -24,15 +25,15 @@ public class main {
         weight = inputData.getWeightDuration();
 
         calculateInitialSolution(setups, jobs, unavailablePeriods);
-        inputData.printSetupMatrix();
+        //inputData.printSetupMatrix();
 
-        illustrateBasicFunctions();
+        //illustrateBasicFunctions();
 
         double cost = calculateCost();
 
         // Write to JSON-file
-        // OutputData outputData = InputData.generateOutput("TOY-20-10", cost, scheduledTasks);
-        // InputData.writeFile("calculatedSolution/sol_TOY-20-10.json", outputData);
+        OutputData outputData = InputData.generateOutput("A-100-30", cost, scheduledTasks);
+        InputData.writeFile("calculatedSolution/sol_A-100-30.json", outputData);
 
 
     }
@@ -401,25 +402,15 @@ public class main {
 
     public static void calculateStartTimes() {
         int timer=0;
-        for (Task t: scheduledTasks) {
-            t.setStartDate(timer);
-            int duration = -1;
-            if(t.getClass()==Job.class){
-                Job j = (Job) t;
-                if(checkJobFeasible(j)) duration = j.getDuration();
-            }
-            if (t.getClass()==Setup.class){
-                Setup s = (Setup) t;
-                duration = s.getDuration();
-            }
-            if(duration >0){
-                timer+=duration;
-                t.setFinishDate(timer);
+        for (Task task: scheduledTasks) {
+            task.setStartDate(timer);
+            if(task.isFeasibleDates()){
+                task.calculateFinishDate();
+                timer = task.getFinishDate();
             }
             else {
-                operation_deleteJob(scheduledTasks.indexOf(t));
+                operation_deleteJob(scheduledTasks.indexOf(task));
             }
-
         }
     }
 

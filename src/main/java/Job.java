@@ -1,9 +1,6 @@
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Job extends Task{
     @Expose
     private int id;
@@ -61,17 +58,31 @@ public class Job extends Task{
         this.rejectionPenalty = rejectionPenalty;
     }
 
-    public void calculateFinishDate() {
-        this.finishDate = this.startDate + this.duration - 1;
+    public boolean isFeasibleDates() {
+        return startDate>=releaseDate && finishDate<=dueDate;
     }
 
 
+
+    public boolean makesDueDate(int startingTime) {
+        return startingTime + duration <= dueDate;
+    }
+
+    public double getCost() {
+        if(startDate<0) return rejectionPenalty;
+        else return earlinessPenalty*(dueDate - finishDate);
+    }
+
+    public void setJobSkipped() {
+        finishDate = -1;
+        startDate = -1;
+    }
 
     @Override
     public String toString() {
         return
                 "Job{" +
-                "id=" + id +
+                        "id=" + id +
 //                ", duration=" + duration +
 //                ", releaseDate=" + releaseDate +
 //                ", dueDate=" + dueDate +
@@ -79,26 +90,6 @@ public class Job extends Task{
 //                ", rejectionPenalty=" + rejectionPenalty +
 //                ", start=" + startDate +
 //                ", finishDate=" + finishDate +
-                "}";
-    }
-
-    public boolean makesDueDate(int startingTime) {
-        return startingTime + duration <= dueDate;
-    }
-
-    public double getCost() {
-        double cost;
-        if(startDate<0) { // Job not scheduled
-            cost = rejectionPenalty;
-        }
-        else {
-            cost = earlinessPenalty*(dueDate - finishDate);
-        }
-        return cost;
-    }
-
-    public void setJobSkipped() {
-        finishDate = -1;
-        startDate = -1;
+                        "}";
     }
 }

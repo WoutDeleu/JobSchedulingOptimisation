@@ -16,7 +16,7 @@ XXX. 2 basisoperaties implementeren!! (based on those, expand functionality)
         2.3.2 makeFeasibleDates()
             => smijt die eruit die niet voldoen aan releaseDate / dueDate
             => dit moet tijdens toekennen starttijden, want anders zijn alle starttijden die erna komen terug fout
-            => gelijkaardig patroon aan makeFeasible() volgen: methode in klasse Task en overkoepelende in de main
+            => gelijkaardig patroon aan makeFeasibleUPs() volgen: methode in klasse Task en overkoepelende in de main
 
     2.3. makeFeasibleUPs()
         2.3.1 smijt die eruit die overlappen met unavailable periods

@@ -16,7 +16,6 @@ public class Setup extends Task{
         this.job2 = job2;
     }
 
-
     public int getDuration() {
         return duration;
     }
@@ -38,9 +37,9 @@ public class Setup extends Task{
         this.job2 = job2;
     }
 
-    public void calculateFinishDate() {
-        finishDate = startDate + duration;
-    }
+
+    // Setup has no releaseDate and dueDate so is always feasible by its dates
+    public boolean isFeasibleDates() {return true;}
 
     @Override
     public String toString() {

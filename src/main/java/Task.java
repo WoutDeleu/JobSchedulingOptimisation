@@ -3,7 +3,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class Task {
+public abstract class Task {
     @Expose
     @SerializedName("start")
     protected int startDate = -1;
@@ -22,9 +22,9 @@ public class Task {
     }
 
     public void setStartDate(int startDate) { this.startDate = startDate; }
-
-    public void setFinishDate(int finishDate) {
-        this.finishDate = finishDate;
+    public void calculateFinishDate() {
+        assert startDate >= 0 : "startDate not set";
+        finishDate = startDate+getDuration()-1;
     }
 
     // Returns true if the job doesn't overlap with any unavailable periods
@@ -48,6 +48,12 @@ public class Task {
         }
         return true;
     }
+
+    /** abstract functions **/
+    public abstract int getDuration();
+    public abstract boolean isFeasibleDates();
+
+
 
 
 }
