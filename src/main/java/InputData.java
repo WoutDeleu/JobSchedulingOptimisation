@@ -52,6 +52,16 @@ public class InputData {
         return matrix;
     }
 
+    public void printSetupMatrix() {
+        int[][] matrix = getSetupMatrix();
+        for (int i = 0; i < matrix.length ; i++) {
+            for (int j = 0; j < matrix.length; j++) {
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
     public Setup getSetup(int id1, int id2) {
         int duration = setups.get(id1)[id2];
         return new Setup(duration, id1, id2);

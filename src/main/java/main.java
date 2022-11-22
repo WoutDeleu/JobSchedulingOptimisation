@@ -1,10 +1,11 @@
+import java.sql.SQLOutput;
 import java.util.LinkedList;
 import java.util.List;
 
 
 public class main {
 
-    private static LinkedList<Task> scheduledTasks = new LinkedList<>();
+    static LinkedList<Task> scheduledTasks = new LinkedList<>();
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
     private static List<Job> jobs = new LinkedList<>();
     private static SetupList setups;
@@ -22,65 +23,62 @@ public class main {
         weight = inputData.getWeightDuration();
 
         calculateInitialSolution(setups, jobs, unavailablePeriods);
-
-        double cost = calculateCost();
-        System.out.println("Cost: " + cost);
-
-/**
-        // Write to JSON-file
-        OutputData outputData = InputData.generateOutput("TOY-20-10", cost, scheduledTasks);
-        InputData.writeFile("calculatedSolution/sol_TOY-20-10.json", outputData);
- **/
+        inputData.printSetupMatrix();
 
         illustrateBasicFunctions();
+
+        double cost = calculateCost();
+
+        // Write to JSON-file
+        // OutputData outputData = InputData.generateOutput("TOY-20-10", cost, scheduledTasks);
+        // InputData.writeFile("calculatedSolution/sol_TOY-20-10.json", outputData);
+
+
     }
 
-    /**Funciton to illustrate the 3 basic operations**/
+
+    /*********************************** TESTING ***********************************/
+
     public static void illustrateBasicFunctions() throws Exception {
-        System.out.println("****************************Delete job************************************");
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-        operation_deleteJob(2);
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-
-        System.out.println("****************************Delete Setup************************************");
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-        operation_deleteSetup(1);
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-
-        System.out.println("****************************Insert************************************");
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-        operation_insertJob(1, jobs.get(1));
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-
-        System.out.println("****************************SWAPt************************************");
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
-        operation_swap2(0, 2);
-        for(int i = 0; i < scheduledTasks.size(); i++){
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
-        }
-        System.out.println();
+        testDeleteJob();
+        testInsertJob();
+        testSwapJobs();
     }
+
+    public static void testDeleteJob() {
+        System.out.println("**************************** Delete job ************************************");
+        printScheduledTasks("Original data");
+        operation_deleteJob(2);
+        printScheduledTasks("Deleted job in the middle");
+        operation_deleteJob(4);
+        printScheduledTasks("Deleted last job");
+        operation_deleteJob(0);
+        printScheduledTasks("Deleted first job");
+    }
+
+    public static void testInsertJob() {
+        System.out.println("****************************** Insert **************************************");
+        printScheduledTasks("Original data");
+        operation_insertJob(10, waitingJobs.get(0));
+        printScheduledTasks("Inserted job at the end");
+        operation_insertJob(0, waitingJobs.get(0));
+        printScheduledTasks("Inserted job at the start");
+        operation_insertJob(3, waitingJobs.get(0));
+        printScheduledTasks("Inserted job in the middle");
+    }
+
+    public static void testSwapJobs() {
+        System.out.println("******************************* Swap ***************************************");
+        printScheduledTasks("Original data");
+        operation_swapJobs(0, 6);
+        printScheduledTasks("Swapped first and last");
+        operation_swapJobs(2, 4);
+        printScheduledTasks("Swapped second and third");
+    }
+
+
+    /*********************************** INITIAL SOLUTION ***********************************/
+
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
         boolean maxReached = false;
         for(Job job : jobs) {
@@ -112,8 +110,6 @@ public class main {
             scheduledTasks.removeLast();
             queueJob(j);
         }
-
-        // todo : fill up holes
     }
 
     private static void scheduleJob_EndOfLine(Job job, SetupList setups, List<UnavailablePeriod> unavailablePeriods) {
@@ -194,19 +190,130 @@ public class main {
     }
 
     private static void queueJob(Job job) {
-//        job.setJobSkipped();
         waitingJobs.addLast(job);
     }
 
     public static double calculateCost() {
         double cost = 0;
-        for (Job job : jobs) {
-            cost += job.getCost();
-        }
+        for (Job job : jobs) cost += job.getCost();
         cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
         return (double) Math.round(cost * 100) / 100;
     }
 
+    /*********************************** BASIC OPERATIONS ***********************************/
+
+    public static void operation_deleteJob(int index) {
+        Task task = scheduledTasks.get(index);
+
+        assert task.getClass()==Job.class : "Can't remove a setup with an operation: delete job";
+        assert index>=0 : "No negative index allowed";
+
+        waitingJobs.add((Job) task);
+
+        if(index != 0) {
+            // Remove job and setup necessary for that job
+            scheduledTasks.remove(index);
+            scheduledTasks.remove(index-1);
+
+            // Adapt neighbouring setup
+            if(index < scheduledTasks.size()) {
+                Job j1 = (Job) scheduledTasks.get(index-2);
+                Job j2 = (Job) scheduledTasks.get(index);
+                scheduledTasks.set(index-1, setups.getSetup(j1.getId(), j2.getId()));
+            }
+        }
+        else {
+            scheduledTasks.remove(index);
+            scheduledTasks.remove(index);
+        }
+
+    }
+
+    public static void operation_insertJob(int index, Job job) {
+        assert index>=0 : "No negative index allowed";
+
+        waitingJobs.remove(job);
+
+        // Insert the job
+        if (index <= scheduledTasks.size()){
+            scheduledTasks.add(index, job);
+        }
+        else {
+            scheduledTasks.addLast(job);
+            index = scheduledTasks.indexOf(job);
+        }
+
+        // Adapt neighbouring setups
+        Task previous = null;
+        Task next = null;
+        if (index != 0) previous = scheduledTasks.get(index - 1);
+        if (scheduledTasks.size() > index+1) next = scheduledTasks.get(index + 1);
+
+        if(previous != null) { // If there was no previous job, no need to add setup before
+            if (previous.getClass() == Setup.class) { // Job was inserted after a setup
+                // Adapt previous setup to current job
+                Job j1 = (Job) scheduledTasks.get(index-2);
+                scheduledTasks.set(index-1, setups.getSetup(j1.getId(), job.getId()));
+            }
+            else { // Job was inserted after another job
+                // Add a setup in between
+                Job j1 = (Job) previous;
+                scheduledTasks.add(index, setups.getSetup(j1.getId(), job.getId()));
+                index = scheduledTasks.indexOf(job); // index is shifted by insert above
+            }
+        }
+
+        if(next != null) {
+            if (next.getClass() == Setup.class) { // Job was inserted before a setup
+                // Adapt next setup to current job
+                Job j2 = (Job) scheduledTasks.get(index+2);
+                scheduledTasks.set(index+1, setups.getSetup(job.getId(), j2.getId()));
+            }
+            else { // Job was inserted before another job
+                // Add a setup in between
+                Job j2 = (Job) next;
+                scheduledTasks.add(index+1, setups.getSetup(job.getId(), j2.getId()));
+            }
+        }
+    }
+
+
+
+    public static void operation_swapJobs(int i1, int i2) {
+        assert i1!=i2 : "Indices cannot be equal for swap operation";
+        assert i1%2==0 && i2%2==0 : "Indices must be even numbers to get Jobs and not Setups";
+
+        int index1 = Math.min(i1, i2);
+        int index2 = Math.max(i1, i2);
+
+        Job job1 = (Job) scheduledTasks.get(index1);
+        Job job2 = (Job) scheduledTasks.get(index2);
+
+        operation_deleteJob(index2);
+        operation_deleteJob(index1);
+
+        operation_insertJob(index1, job2);
+        operation_insertJob(index2, job1);
+    }
+
+    /*********************************** I/O ***********************************/
+
+    public static void printScheduledTasks(String comment) {
+        System.out.println(comment+":");
+        printScheduledTasks();
+    }
+
+    public static void printScheduledTasks() {
+        int i;
+        for(i = 0; i < scheduledTasks.size()-1; i++) {
+            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+        }
+        System.out.println(i + ": " + scheduledTasks.get(i));
+    }
+
+
+
+    /*
     // Runs over schedule
     // Removes scheduled task which clash with the unavailability periods
     public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) throws Exception {
@@ -216,12 +323,12 @@ public class main {
             if(t.getStartDate() > unavailablePeriods.get(unavailablePeriods.size()-1).getFinishDate()){
                 break;
             }
-            /* if(t.getClass()==Job.class){
-                Job job = (Job) t;
-                if(job.getStartDate()<job.getReleaseDate()){
-                    scheduledTasks.remove(job);
-                }
-            }*/
+//             if(t.getClass()==Job.class){
+//                Job job = (Job) t;
+//                if(job.getStartDate()<job.getReleaseDate()){
+//                    scheduledTasks.remove(job);
+//                }
+//            }
 
             for(UnavailablePeriod u : unavailablePeriods) {
                 // If task of task is executed during unavailability period
@@ -238,7 +345,7 @@ public class main {
             }
         }
     }
-    /**Deze functie is enkel en alleen om de makefeasable goe te krijgen...**/
+//    Deze functie is enkel en alleen om de makefeasable goe te krijgen...
     public static void operation_deleteSetup(int index) throws Exception {
         Task task = scheduledTasks.get(index);
         if(task.getClass()==Job.class) {
@@ -256,73 +363,7 @@ public class main {
             ((Setup) scheduledTasks.get(index)).setJob1(j.getId());
         }
     }
-
-    public static void operation_deleteJob(int index) throws Exception {
-        Task task = scheduledTasks.get(index);
-        if(task.getClass()==Job.class) {
-            // remove job and setup necessary for that job
-            if(index > 0) {
-                scheduledTasks.remove(index);
-                scheduledTasks.remove(index-1);
-
-                // reconnect links
-                if(index  < scheduledTasks.size()) {
-                    Job j = (Job) scheduledTasks.get(index - 2);
-                    ((Setup) scheduledTasks.get(index - 1)).setJob1(j.getId());
-                }
-            }
-            else {
-                scheduledTasks.remove(index);
-                scheduledTasks.remove(index);
-            }
-        }
-        else if(task.getClass()==Setup.class) {
-            throw new Exception("Can't remove a setup with an operation: delete job");
-        }
-    }
-
-    public static void operation_insertJob(int index, Job job) throws Exception {
-        if (index <= scheduledTasks.size()) scheduledTasks.add(index, job);
-        else {
-            scheduledTasks.addLast(job);
-            index = scheduledTasks.indexOf(job);
-        }
-        Task pre = null, nex = null;
-        if (index > 0) pre = scheduledTasks.get(index - 1);
-        if (scheduledTasks.size() > index+1) nex = scheduledTasks.get(index + 1);
-
-        // Determine wether job is scheduled before or after setup
-        // If there was no previous job, no need to add setup before
-        if(pre != null) {
-            if (pre.getClass() == Setup.class) {
-                // scheduled right after setup
-                // adjust previous setup to current job
-                ((Setup) pre).setJob2(job.getId());
-            }
-            else scheduledTasks.add(index, setups.getSetup((((Job) pre).getId()), job.getId()));
-
-        }
-        if(nex != null) {
-            if (nex.getClass() == Setup.class) {
-                ((Setup) nex).setJob1(job.getId());
-            }
-            else scheduledTasks.add(index + 1, setups.getSetup(job.getId(), ((Job) nex).getId()));
-        }
-    }
-    public static void operation_swap2(int i1, int i2) throws Exception {
-        int index1 = Math.min(i1, i2);
-        int index2 = Math.max(i1, i2);
-
-        Job job1 = (Job) scheduledTasks.get(index1);
-        Job job2 = (Job) scheduledTasks.get(index2);
-
-        operation_deleteJob(index2);
-        operation_deleteJob(index1);
-
-        operation_insertJob(index1, job2);
-        operation_insertJob(index2, job1);
-
-    }
+    */
 }
 
 

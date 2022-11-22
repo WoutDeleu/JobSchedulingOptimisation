@@ -12,4 +12,10 @@ public class SetupList {
         return new Setup(duration, id1, id2);
     }
 
+    @Override
+    public String toString() {
+        return "SetupList{" +
+                "setups=" + setups +
+                '}';
+    }
 }

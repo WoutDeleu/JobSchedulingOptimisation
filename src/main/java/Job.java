@@ -17,6 +17,16 @@ public class Job extends Task{
     @SerializedName("rejection_penalty")
     private double rejectionPenalty;
 
+
+    public Job(int id, int duration, int releaseDate, int dueDate, double earlinessPenalty, double rejectionPenalty) {
+        this.id = id;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.dueDate = dueDate;
+        this.earlinessPenalty = earlinessPenalty;
+        this.rejectionPenalty = rejectionPenalty;
+    }
+
     public int getId() { return id; }
     public int getDuration() {
         return duration;
