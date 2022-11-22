@@ -40,7 +40,8 @@ public class main {
     /*********************************** TESTING ***********************************/
 
     public static void illustrateBasicFunctions() throws Exception {
-        testDeleteJob();
+        //testDeleteJob();
+        testDeleteSetup();
         testInsertJob();
         testSwapJobs();
     }
@@ -54,6 +55,17 @@ public class main {
         printScheduledTasks("Deleted last job");
         operation_deleteJob(0);
         printScheduledTasks("Deleted first job");
+    }
+
+    public static void testDeleteSetup() {
+        System.out.println("*************************** Delete setup ***********************************");
+        printScheduledTasks("Original data");
+        operation_deleteSetup(3);
+        printScheduledTasks("Deleted setup in the middle");
+        operation_deleteSetup(3);
+        printScheduledTasks("Deleted last setup");
+        operation_deleteSetup(1);
+        printScheduledTasks("Deleted first setup");
     }
 
     public static void testInsertJob() {
@@ -193,12 +205,7 @@ public class main {
         waitingJobs.addLast(job);
     }
 
-    public static double calculateCost() {
-        double cost = 0;
-        for (Job job : jobs) cost += job.getCost();
-        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
-        return (double) Math.round(cost * 100) / 100;
-    }
+
 
     /*********************************** BASIC OPERATIONS ***********************************/
 
@@ -229,6 +236,29 @@ public class main {
 
     }
 
+    // Assisting function for makeFeasible()
+    public static void operation_deleteSetup(int index) {
+        Task task = scheduledTasks.get(index);
+
+        assert task.getClass()==Setup.class : "Can't remove a job with an operation: delete setup";
+        assert index>0 : "No negative index or index zero allowed";
+
+        // Remove setup and it's corresponding job
+        scheduledTasks.remove(index);
+        Job job = (Job) scheduledTasks.get(index);
+        waitingJobs.add(job);
+        scheduledTasks.remove(job);
+
+        // Adapt neighbouring setup
+        Job j2 = null;
+        if (scheduledTasks.size() > index) j2 = (Job) scheduledTasks.get(index+1);
+        if (j2 != null) { // j2 == null if the last setup was removed
+            Job j1 = (Job) scheduledTasks.get(index-1);
+            scheduledTasks.set(index, setups.getSetup(j1.getId(), j2.getId()));
+        }
+
+    }
+
     public static void operation_insertJob(int index, Job job) {
         assert index>=0 : "No negative index allowed";
 
@@ -246,7 +276,7 @@ public class main {
         // Adapt neighbouring setups
         Task previous = null;
         Task next = null;
-        if (index != 0) previous = scheduledTasks.get(index - 1);
+        if (index != 0) previous = scheduledTasks.get(index-1);
         if (scheduledTasks.size() > index+1) next = scheduledTasks.get(index + 1);
 
         if(previous != null) { // If there was no previous job, no need to add setup before
@@ -277,8 +307,6 @@ public class main {
         }
     }
 
-
-
     public static void operation_swapJobs(int i1, int i2) {
         assert i1!=i2 : "Indices cannot be equal for swap operation";
         assert i1%2==0 && i2%2==0 : "Indices must be even numbers to get Jobs and not Setups";
@@ -295,6 +323,30 @@ public class main {
         operation_insertJob(index1, job2);
         operation_insertJob(index2, job1);
     }
+
+    /*********************************** LOCAL SEARCH ***********************************/
+
+
+    // Removes scheduled task which clash with the unavailability periods
+    public static void makeFeasibleUPs(int start, List<UnavailablePeriod> unavailablePeriods) {
+
+        for(int i=start; i<scheduledTasks.size(); i++) {
+            Task task = scheduledTasks.get(i);
+
+            if(!task.isFeasibleUPs(unavailablePeriods)) {
+                if(task.getClass()==Job.class) operation_deleteJob(i);
+                else operation_deleteSetup(i);
+            }
+        }
+    }
+
+    public static double calculateCost() {
+        double cost = 0;
+        for (Job job : jobs) cost += job.getCost();
+        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+        return (double) Math.round(cost * 100) / 100;
+    }
+
 
     /*********************************** I/O ***********************************/
 
@@ -313,57 +365,8 @@ public class main {
 
 
 
-    /*
-    // Runs over schedule
-    // Removes scheduled task which clash with the unavailability periods
-    public static void makeFeasible(int index, List<UnavailablePeriod> unavailablePeriods) throws Exception {
-        for(int i=index; i<scheduledTasks.size(); i++) {
-            Task t = scheduledTasks.get(i);
-            // If task is scheduled after ALL the unavailable periods
-            if(t.getStartDate() > unavailablePeriods.get(unavailablePeriods.size()-1).getFinishDate()){
-                break;
-            }
-//             if(t.getClass()==Job.class){
-//                Job job = (Job) t;
-//                if(job.getStartDate()<job.getReleaseDate()){
-//                    scheduledTasks.remove(job);
-//                }
-//            }
 
-            for(UnavailablePeriod u : unavailablePeriods) {
-                // If task of task is executed during unavailability period
-                // It needs to be taken out (T1 -> S12 -> T2 -> S23 -> T3 ->) => (T1 -> S13 -> T3)
-                // Remark: links must be restored (no dangling links)
-                if((t.getStartDate() >= u.getStartDate() && t.getStartDate() <= u.getFinishDate()) || (u.getStartDate()<=t.getFinishDate() && t.getFinishDate()<=u.getFinishDate())) {
-                    if(t.getClass()==Job.class){
-                        operation_deleteJob(i);
-                    }
-                    if(t.getClass()==Setup.class) {
-                        operation_deleteSetup(i);
-                    }
-                }
-            }
-        }
-    }
-//    Deze functie is enkel en alleen om de makefeasable goe te krijgen...
-    public static void operation_deleteSetup(int index) throws Exception {
-        Task task = scheduledTasks.get(index);
-        if(task.getClass()==Job.class) {
-            throw new Exception("Can't remove a job with an operation: delete setup");
-        }
-        if(task.getClass()==Setup.class) {
-            //remove setup in unavailable period and job after setup in unavailable period
-            // + replace setup remaining after job after setup in unavailable period
-            scheduledTasks.remove(index);
-            scheduledTasks.remove(index);
 
-            // reconnect links
-            Job j = (Job) scheduledTasks.get(index-1);
-            // Setup s = (Setup) scheduledTasks.get(i-2);
-            ((Setup) scheduledTasks.get(index)).setJob1(j.getId());
-        }
-    }
-    */
 }
 
 

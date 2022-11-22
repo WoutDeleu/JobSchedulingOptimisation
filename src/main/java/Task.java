@@ -24,9 +24,15 @@ public class Task {
     public void setStartDate(int startDate) { this.startDate = startDate; }
 
     // Returns true if the job doesn't overlap with any unavailable periods
-    public boolean checkExecutable(List<UnavailablePeriod> unavailablePeriods) {
+    public boolean isFeasibleUPs(List<UnavailablePeriod> unavailablePeriods) {
         assert startDate >= 0 : "startDate not set";
         assert finishDate >= 0 : "finishDate not set";
+
+        // If task is scheduled after ALL the unavailable periods
+        if (startDate>unavailablePeriods.get(unavailablePeriods.size()-1).getFinishDate()) {
+            return true;
+        }
+
         for (UnavailablePeriod up : unavailablePeriods) {
             int startUp = up.getStartDate();
             int endUp = up.getFinishDate();

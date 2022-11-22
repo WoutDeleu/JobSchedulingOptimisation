@@ -53,6 +53,7 @@ public class InputData {
     }
 
     public void printSetupMatrix() {
+        System.out.println("Setup matrix: ");
         int[][] matrix = getSetupMatrix();
         for (int i = 0; i < matrix.length ; i++) {
             for (int j = 0; j < matrix.length; j++) {
