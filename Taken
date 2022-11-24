@@ -34,6 +34,10 @@ XXX. 2 basisoperaties implementeren!! (based on those, expand functionality)
         3.4.2 Als we lang op plateau zitten (niet verbeteren) toelaten om even een slechtere oplossing door te voeren
               om zo terug nieuwe opties te kunnen verkennen
 
+
+Todo:
+- breid setStartDate() functie uit zodat ge geen startDate kunt zetten voor de releaseDate
+
 Extra:
 - counters to see with margins
 - in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte

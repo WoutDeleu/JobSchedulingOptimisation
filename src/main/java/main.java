@@ -403,10 +403,10 @@ public class main {
     public static void calculateStartTimes() {
         int timer=0;
         for (Task task: scheduledTasks) {
-            task.setStartDate(timer);
+            task.setStartDate(timer); //todo overwrite en check of wel na releaseDate ligt
             if(task.isFeasibleDates()){
                 task.calculateFinishDate();
-                timer = task.getFinishDate();
+                timer = task.getFinishDate()+1;
             }
             else {
                 operation_deleteJob(scheduledTasks.indexOf(task));
