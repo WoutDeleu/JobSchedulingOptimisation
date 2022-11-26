@@ -21,7 +21,7 @@ public abstract class Task {
         return finishDate;
     }
 
-    public void setStartDate(int startDate) { this.startDate = startDate; }
+
     public void calculateFinishDate() {
         assert startDate >= 0 : "startDate not set";
         finishDate = startDate+getDuration()-1;
@@ -29,7 +29,7 @@ public abstract class Task {
 
     // Returns true if the job doesn't overlap with any unavailable periods
     public boolean isFeasibleUPs(List<UnavailablePeriod> unavailablePeriods) {
-        assert startDate >= 0 : "startDate not set";
+        assert startDate >= 0 : "startDate not set: "+this;
         assert finishDate >= 0 : "finishDate not set";
 
         // If task is scheduled after ALL the unavailable periods
@@ -52,6 +52,8 @@ public abstract class Task {
     /** abstract functions **/
     public abstract int getDuration();
     public abstract boolean isFeasibleDates();
+    public abstract void setStartDate(int startDate);
+    public abstract void setEarliestStartDate(int startDate);
 
 
 

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class SetupList {
     private ArrayList<int[]> setups = new ArrayList<>();
@@ -7,9 +8,12 @@ public class SetupList {
         this.setups = setups;
     }
 
-    public Setup getSetup(int id1, int id2) {
-        int duration = setups.get(id1)[id2];
-        return new Setup(duration, id1, id2);
+    public Setup getSetup(Job j1, Job j2) {
+        int duration = setups.get(j1.getId())[j2.getId()];
+        Setup setup = new Setup(duration, j1.getId(), j2.getId());
+        // Plan setup as close as possible to job 2
+        setup.calculateStartAndFinish(j2);
+        return setup;
     }
 
     @Override

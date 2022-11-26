@@ -23,10 +23,15 @@ public class main {
         horizon = inputData.getHorizon();
         weight = inputData.getWeightDuration();
 
+        System.out.println(unavailablePeriods);
+
         calculateInitialSolution(setups, jobs, unavailablePeriods);
         //inputData.printSetupMatrix();
 
-        illustrateBasicFunctions(unavailablePeriods);
+        //illustrateBasicFunctions();
+        testLocalSearch(unavailablePeriods);
+
+
 
         double cost = calculateCost();
 
@@ -39,12 +44,11 @@ public class main {
     }
     /*********************************** TESTING ***********************************/
 
-    public static void illustrateBasicFunctions(List<UnavailablePeriod> unavailablePeriods) throws Exception {
+    public static void illustrateBasicFunctions()  {
         //testDeleteJob();
-        //testDeleteSetup();
-        //testInsertJob();
-        //testSwapJobs();
-        testLocalSearch(unavailablePeriods);
+        testDeleteSetup();
+        testInsertJob();
+        testSwapJobs();
     }
 
     public static void testDeleteJob() {
@@ -91,6 +95,11 @@ public class main {
 
     public static void testLocalSearch(List<UnavailablePeriod> unavailablePeriods) {
         System.out.println("**************************** Local Search ************************************");
+//        localSearchDelete(1, unavailablePeriods);
+//        localSearchInsert(1, unavailablePeriods);
+//        localSearchSwap(1, unavailablePeriods);
+
+
         printScheduledTasks("Original data");
         localSearch(20, unavailablePeriods);
         printScheduledTasks("first local search attempt");
@@ -139,7 +148,7 @@ public class main {
 
             // Schedule setup
             int startingDateSetup = previous.finishDate+1;
-            Setup setup = setups.getSetup(((Job) previous).getId(), job.getId());
+            Setup setup = setups.getSetup((Job) previous, job);
             int durationSetup = setup.getDuration();
             for (UnavailablePeriod up : unavailablePeriods) {
                 // Break: when slot is found to plan the setup
@@ -232,11 +241,10 @@ public class main {
 
             // Adapt neighbouring setup
             if(index < scheduledTasks.size()) {
-                System.out.println("job 1: "+ scheduledTasks.get(index-2).getClass());
-                System.out.println("job 2:"+ scheduledTasks.get(index).getClass());
+                System.out.println(scheduledTasks);
                 Job j1 = (Job) scheduledTasks.get(index-2);
                 Job j2 = (Job) scheduledTasks.get(index);
-                scheduledTasks.set(index-1, setups.getSetup(j1.getId(), j2.getId()));
+                scheduledTasks.set(index-1, setups.getSetup(j1, j2));
             }
         }
         else {
@@ -264,17 +272,17 @@ public class main {
         if (scheduledTasks.size() > index) j2 = (Job) scheduledTasks.get(index+1);
         if (j2 != null) { // j2 == null if the last setup was removed
             Job j1 = (Job) scheduledTasks.get(index-1);
-            scheduledTasks.set(index, setups.getSetup(j1.getId(), j2.getId()));
+            scheduledTasks.set(index, setups.getSetup(j1, j2));
         }
 
     }
 
     public static void operation_insertJob(int index, Job job) {
-        operation_addJob(index, job);
+        operation_insertJobNoWaitingList(index, job);
         waitingJobs.remove(job);
     }
 
-    public static void operation_addJob(int index, Job job) {
+    public static void operation_insertJobNoWaitingList(int index, Job job) {
         assert index>=0 : "No negative index allowed";
 
         // Insert the job
@@ -296,12 +304,12 @@ public class main {
             if (previous.getClass() == Setup.class) { // Job was inserted after a setup
                 // Adapt previous setup to current job
                 Job j1 = (Job) scheduledTasks.get(index-2);
-                scheduledTasks.set(index-1, setups.getSetup(j1.getId(), job.getId()));
+                scheduledTasks.set(index-1, setups.getSetup(j1, job));
             }
             else { // Job was inserted after another job
                 // Add a setup in between
                 Job j1 = (Job) previous;
-                scheduledTasks.add(index, setups.getSetup(j1.getId(), job.getId()));
+                scheduledTasks.add(index, setups.getSetup(j1, job));
                 index = scheduledTasks.indexOf(job); // index is shifted by insert above
             }
         }
@@ -311,12 +319,12 @@ public class main {
                 // Adapt next setup to current job
                 System.out.println(scheduledTasks.get(index+2).getClass());
                 Job j2 = (Job) scheduledTasks.get(index+2);
-                scheduledTasks.set(index+1, setups.getSetup(job.getId(), j2.getId()));
+                scheduledTasks.set(index+1, setups.getSetup(job, j2));
             }
             else { // Job was inserted before another job
                 // Add a setup in between
                 Job j2 = (Job) next;
-                scheduledTasks.add(index+1, setups.getSetup(job.getId(), j2.getId()));
+                scheduledTasks.add(index+1, setups.getSetup(job, j2));
             }
         }
     }
@@ -339,40 +347,38 @@ public class main {
     }
 
     /*********************************** LOCAL SEARCH ***********************************/
+
+
     public static void localSearch(int x, List<UnavailablePeriod> unavailablePeriods) {
         // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
         currentBestValue = Double.MAX_VALUE;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
-        while(i<10000) {
+        while(i<100) {
             System.out.println("while loop iteration: "+i);
             System.out.println("grootte van de wachtlijst "+waitingJobs.size());
+            System.out.println("grootte van de scheduled list "+scheduledTasks.size());
             executeRandomBasicOperation();
-            if(i%x==0){
+//            if(i%x==0){
                 LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
                 calculateStartTimes();
                 makeFeasibleUPs(0, unavailablePeriods);
 
                 ///////// hier nog feasible inserts functie invoegen
-                System.out.println(waitingJobs.size());
-                for (Job j: waitingJobs) {
-                    feasibleInsert(j);
-                    if(scheduledTasks.contains(j)) jobsToRemove.add(j);
-                }
-                jobsToRemove.forEach(waitingJobs::remove);
-                System.out.println("feasible inserts took place");
+//                System.out.println(waitingJobs.size());
+//                for (Job j: waitingJobs) {
+//                    feasibleInsert(j);
+//                    if(scheduledTasks.contains(j)) jobsToRemove.add(j);
+//                }
+//                jobsToRemove.forEach(waitingJobs::remove);
+//                System.out.println("feasible inserts took place");
 
                 double tempCost = calculateCost();
-                System.out.println("cost calculated");
-                if (currentBestValue>tempCost) {
-                    currentBestValue=tempCost;
-                }
-                else {
-                    scheduledTasks = oldScheduling;
-                }
+                if (currentBestValue>tempCost) currentBestValue=tempCost;
+                else scheduledTasks = oldScheduling;
 
-            }
+//            }
             i++;
 
         }
@@ -380,29 +386,36 @@ public class main {
 
     //function to execute one of the basic operations on the temporary solution
     public static void executeRandomBasicOperation(){
-        Random operation = new Random();
-        int jobIndex = 0;
-        Random job = new Random();
-        switch(operation.nextInt(3)){
-            case 0:
-                jobIndex = job.nextInt(scheduledTasks.size());
-                if(!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
-                operation_deleteJob(jobIndex);
+        Random rand = new Random();
+        int jobIndex = rand.nextInt(scheduledTasks.size());
+        if(!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
+
+        switch(rand.nextInt(3)){
+            case 0: // delete
+                if(!scheduledTasks.isEmpty()) {
+                    operation_deleteJob(jobIndex);
+                    System.out.println("delete");
+                }
                 break;
-            case 1:
-                jobIndex = job.nextInt(waitingJobs.size());
-                operation_insertJob(jobIndex, waitingJobs.get(jobIndex));
+            case 1: // insert
+                if(!waitingJobs.isEmpty()) {
+                    int waitingIndex = rand.nextInt(waitingJobs.size());
+                    //operation_addJob(jobIndex, waitingJobs.get(waitingIndex));
+                    operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
+                    System.out.println("insert");
+                }
                 break;
-            case 2:
-                jobIndex = job.nextInt(scheduledTasks.size());
-                if(!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
-                int job2 = job.nextInt(scheduledTasks.size());
+            case 2: // swap
+                int job2 = rand.nextInt(scheduledTasks.size());
                 if (!(scheduledTasks.get(job2) instanceof Job)) job2++;
-                if (job2 == jobIndex) job2 = job2+2;
+                if (job2 == jobIndex) {
+                    if(jobIndex==0) job2 += 2;
+                    else job2 -= 2;
+                }
                 operation_swapJobs(jobIndex, job2);
+                System.out.println("swap");
                 break;
         }
-
     }
 
     // Removes scheduled task which clash with the unavailability periods
@@ -429,23 +442,20 @@ public class main {
         LinkedList<Job> jobsToRemove = new LinkedList<>();
         LinkedList<Setup> setupsToRemove = new LinkedList<>();
         for (Task task: scheduledTasks) {
-            task.setStartDate(timer); //todo overwrite en check of wel na releaseDate ligt
+            task.setEarliestStartDate(timer);
             task.calculateFinishDate();
-            if(task.isFeasibleDates()){
+            if (task.isFeasibleDates()) {
                 timer = task.getFinishDate()+1;
             }
             else {
-                System.out.println(task.getClass());
                 if (task instanceof Job j) {
-                    System.out.println("Job");
                     jobsToRemove.add(j);
                 }
                 else if(task instanceof Setup s) {
-                    System.out.println("Setup");
                     setupsToRemove.add(s);
                 }
                 else {
-                    System.out.println(task.getClass());
+                    throw new IllegalStateException("Klasse klopt niet"+ task.getClass());
                 }
 
             }
@@ -472,10 +482,10 @@ public class main {
 
             if(checkIfInsertPossible(j1, j2, job)){
                 int index = scheduledTasks.indexOf(j2);
-                operation_addJob(index, job);
+                operation_insertJobNoWaitingList(index, job);
                 if(scheduledTasks.get(index)==job) {
-                    System.out.println("job inserted");
-                    //calculate start- & finishtime for new setups around inserted job
+                    System.out.println("job feasibly inserted");
+                    //calculate start- & finishTime for new setups around inserted job
                     //and for the job itself
                     Setup s1 = (Setup) scheduledTasks.get(index-1);
                     s1.setStartDate(scheduledTasks.get(index-2).getFinishDate()+1);
@@ -494,8 +504,8 @@ public class main {
     }
 
     public static boolean checkIfInsertPossible(Job j1, Job j2, Job jInsert){
-        Setup s1 = setups.getSetup(j1.getId(), jInsert.getId());
-        Setup s2 = setups.getSetup(jInsert.getId(), j2.getId());
+        Setup s1 = setups.getSetup(j1, jInsert);
+        Setup s2 = setups.getSetup(jInsert, j2);
         int oldDuration = j2.getStartDate()-j1.getFinishDate();
         int newDuration = s1.getDuration() + jInsert.getDuration() + s2.getDuration();
         return oldDuration >= newDuration;

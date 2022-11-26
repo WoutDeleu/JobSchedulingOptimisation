@@ -1,6 +1,8 @@
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class Setup extends Task{
     private int duration;
     @Expose
@@ -40,6 +42,13 @@ public class Setup extends Task{
 
     // Setup has no releaseDate and dueDate so is always feasible by its dates
     public boolean isFeasibleDates() {return true;}
+    public void setStartDate(int startDate) { this.startDate = startDate; }
+    public void setEarliestStartDate(int startDate) { this.startDate = startDate; }
+
+    public void calculateStartAndFinish(Job job) {
+        finishDate = job.startDate-1;
+        startDate = finishDate-duration+1;
+    }
 
     @Override
     public String toString() {
@@ -47,7 +56,7 @@ public class Setup extends Task{
                 "duration=" + duration +
                 ", from=" + job1 +
                 ", to=" + job2 +
-//                ", start=" + startDate +
+                ", start=" + startDate +
 //                ", finishDate=" + finishDate +
                 "}";
     }

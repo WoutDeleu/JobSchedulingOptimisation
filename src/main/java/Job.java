@@ -51,6 +51,16 @@ public class Job extends Task{
     public boolean isFeasibleDates() {
         return startDate>=releaseDate && finishDate<=dueDate;
     }
+    public void setStartDate(int startDate) {
+        assert startDate >= 0 : "Not a valid startDate";
+        assert startDate >= releaseDate : "Cannot schedule before releaseDate";
+        assert startDate <= dueDate : "Cannot schedule after dueDate";
+
+        this.startDate = startDate;
+    }
+    public void setEarliestStartDate(int startDate) {
+        this.startDate =  Math.max(startDate, releaseDate);
+    }
 
 
 
@@ -78,7 +88,7 @@ public class Job extends Task{
 //                ", dueDate=" + dueDate +
 //                ", earlinessPenalty=" + earlinessPenalty +
 //                ", rejectionPenalty=" + rejectionPenalty +
-//                ", start=" + startDate +
+                ", start=" + startDate +
 //                ", finishDate=" + finishDate +
                         "}";
     }
