@@ -243,7 +243,7 @@ public class main {
             scheduledTasks.remove(index-1);
 
             // Adapt neighbouring setup
-            if(index < scheduledTasks.size()) {
+            if(index < scheduledTasks.size() && index > 1) {
                 Job j1 = (Job) scheduledTasks.get(index-2);
                 Job j2 = (Job) scheduledTasks.get(index);
                 scheduledTasks.set(index-1, setups.getSetup(j1, j2));
@@ -274,7 +274,7 @@ public class main {
 
         // Adapt neighbouring setup
         Job j2 = null;
-        if (scheduledTasks.size() > index) j2 = (Job) scheduledTasks.get(index+1);
+        if (scheduledTasks.size() > index+1) j2 = (Job) scheduledTasks.get(index+1);
         if (j2 != null) { // j2 == null if the last setup was removed
             Job j1 = (Job) scheduledTasks.get(index-1);
             scheduledTasks.set(index, setups.getSetup(j1, j2));
@@ -404,12 +404,22 @@ public class main {
     public static void executeRandomBasicOperation(){
         Random rand = new Random();
         switch(rand.nextInt(3)){
-            case 0: operation_deleteJob(randomJobIndex()); break;
-            case 1: operation_swapJobs(randomJobIndex(), randomJobIndex()); break;
+            case 0:
+                if(scheduledTasks.size() > waitingJobs.size()){
+                    operation_deleteJob(randomJobIndex()); break;
+                }
+            case 1:
+                int i1 = randomJobIndex();
+                int i2 = randomJobIndex();
+                System.out.println("i1: "+i1+", i2 : "+i2);
+                operation_swapJobs(i1, i2);
+                break;
             case 2: // insert
                 if(!waitingJobs.isEmpty()) {
                     int waitingIndex = rand.nextInt(waitingJobs.size());
-                    operation_insertJob(randomJobIndex(), waitingJobs.get(waitingIndex));
+                    int index = randomJobIndex();
+                    System.out.println(index+","+waitingIndex);
+                    operation_insertJob(index, waitingJobs.get(waitingIndex));
                 }
                 break;
         }
@@ -419,7 +429,10 @@ public class main {
     public static int randomJobIndex() {
         Random rand = new Random();
         int jobIndex = rand.nextInt(scheduledTasks.size());
-        if (!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
+        if (!(scheduledTasks.get(jobIndex) instanceof Job)) {
+            if(jobIndex==scheduledTasks.size()-1) jobIndex--;
+            else jobIndex++;
+        }
         return jobIndex;
     }
 
@@ -468,13 +481,16 @@ public class main {
             }
         }
 
+        System.out.println("Jobs to remove: "+ jobsToRemove.size()+", Setups to remove: "+ setupsToRemove.size());
+        System.out.println("Remove Jobs");
         for (Job job: jobsToRemove) {
             operation_deleteJob(scheduledTasks.indexOf(job));
         }
-
+        System.out.println("Remove Setups");
         for (Setup setup: setupsToRemove) {
             operation_deleteSetup(scheduledTasks.indexOf(setup));
         }
+        System.out.println("End of calculate start times");
     }
 
     public static boolean checkJobFeasible(Job job){
