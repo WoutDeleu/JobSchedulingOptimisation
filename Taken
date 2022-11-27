@@ -36,9 +36,10 @@ XXX. 2 basisoperaties implementeren!! (based on those, expand functionality)
 
 
 Todo:
-- breid setStartDate() functie uit zodat ge geen startDate kunt zetten voor de releaseDate
+- insert enkel in gebied tussen release and startDate
 
 Extra:
+
 - counters to see with margins
 - in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte
         => ZAL VOORAL ZIJN OBV DE VANAF!!!!! (van tot einde....)

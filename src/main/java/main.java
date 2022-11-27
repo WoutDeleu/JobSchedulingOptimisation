@@ -227,6 +227,9 @@ public class main {
     /*********************************** BASIC OPERATIONS ***********************************/
 
     public static void operation_deleteJob(int index) {
+        System.out.println("start delete job");
+        if(scheduledTasks.isEmpty()) return;
+
         Task task = scheduledTasks.get(index);
 
         assert task.getClass()==Job.class : "Can't remove a setup with an operation: delete job";
@@ -241,14 +244,14 @@ public class main {
 
             // Adapt neighbouring setup
             if(index < scheduledTasks.size()) {
-                System.out.println(scheduledTasks);
                 Job j1 = (Job) scheduledTasks.get(index-2);
                 Job j2 = (Job) scheduledTasks.get(index);
                 scheduledTasks.set(index-1, setups.getSetup(j1, j2));
             }
         }
         else {
-            scheduledTasks.remove(index);
+            // If 2 items or more left, execute remove 2 times, else only one time
+            if (scheduledTasks.size()>=2) scheduledTasks.remove(index);
             scheduledTasks.remove(index);
         }
 
@@ -256,6 +259,8 @@ public class main {
 
     // Assisting function for makeFeasible()
     public static void operation_deleteSetup(int index) {
+        System.out.println("start delete setup");
+        if(scheduledTasks.size()<2) return;
         Task task = scheduledTasks.get(index);
 
         assert task.getClass()==Setup.class : "Can't remove a job with an operation: delete setup";
@@ -278,6 +283,7 @@ public class main {
     }
 
     public static void operation_insertJob(int index, Job job) {
+        System.out.println("start insert job");
         operation_insertJobNoWaitingList(index, job);
         waitingJobs.remove(job);
     }
@@ -330,7 +336,17 @@ public class main {
     }
 
     public static void operation_swapJobs(int i1, int i2) {
-        assert i1!=i2 : "Indices cannot be equal for swap operation";
+        System.out.println("start swap jobs");
+
+        // Correct for 2 matching indexes
+        if (i1 == i2) {
+            if (i1==0) {
+                if (scheduledTasks.size()>1) i2 += 2;
+                else return; // No swap possible of only one job in scheduledTasks
+            }
+            else i1 -= 2;
+        }
+
         assert i1%2==0 && i2%2==0 : "Indices must be even numbers to get Jobs and not Setups";
 
         int index1 = Math.min(i1, i2);
@@ -356,9 +372,9 @@ public class main {
         currentBestValue = Double.MAX_VALUE;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
         while(i<100) {
-            System.out.println("while loop iteration: "+i);
-            System.out.println("grootte van de wachtlijst "+waitingJobs.size());
-            System.out.println("grootte van de scheduled list "+scheduledTasks.size());
+//            System.out.println("while loop iteration: "+i);
+//            System.out.println("grootte van de wachtlijst "+waitingJobs.size());
+//            System.out.println("grootte van de scheduled list "+scheduledTasks.size());
             executeRandomBasicOperation();
 //            if(i%x==0){
                 LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
@@ -387,35 +403,24 @@ public class main {
     //function to execute one of the basic operations on the temporary solution
     public static void executeRandomBasicOperation(){
         Random rand = new Random();
-        int jobIndex = rand.nextInt(scheduledTasks.size());
-        if(!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
-
         switch(rand.nextInt(3)){
-            case 0: // delete
-                if(!scheduledTasks.isEmpty()) {
-                    operation_deleteJob(jobIndex);
-                    System.out.println("delete");
-                }
-                break;
-            case 1: // insert
+            case 0: operation_deleteJob(randomJobIndex()); break;
+            case 1: operation_swapJobs(randomJobIndex(), randomJobIndex()); break;
+            case 2: // insert
                 if(!waitingJobs.isEmpty()) {
                     int waitingIndex = rand.nextInt(waitingJobs.size());
-                    //operation_addJob(jobIndex, waitingJobs.get(waitingIndex));
-                    operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
-                    System.out.println("insert");
+                    operation_insertJob(randomJobIndex(), waitingJobs.get(waitingIndex));
                 }
-                break;
-            case 2: // swap
-                int job2 = rand.nextInt(scheduledTasks.size());
-                if (!(scheduledTasks.get(job2) instanceof Job)) job2++;
-                if (job2 == jobIndex) {
-                    if(jobIndex==0) job2 += 2;
-                    else job2 -= 2;
-                }
-                operation_swapJobs(jobIndex, job2);
-                System.out.println("swap");
                 break;
         }
+        printScheduledTasks();
+    }
+
+    public static int randomJobIndex() {
+        Random rand = new Random();
+        int jobIndex = rand.nextInt(scheduledTasks.size());
+        if (!(scheduledTasks.get(jobIndex) instanceof Job)) jobIndex++;
+        return jobIndex;
     }
 
     // Removes scheduled task which clash with the unavailability periods
@@ -433,11 +438,13 @@ public class main {
     public static double calculateCost() {
         double cost = 0;
         for (Job job : jobs) cost += job.getCost();
-        cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+        if (!scheduledTasks.isEmpty()) // add total schedule duration
+            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
         return (double) Math.round(cost * 100) / 100;
     }
 
     public static void calculateStartTimes() {
+        System.out.println("start calculate start times");
         int timer=0;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
         LinkedList<Setup> setupsToRemove = new LinkedList<>();
@@ -520,6 +527,7 @@ public class main {
     }
 
     public static void printScheduledTasks() {
+        if(scheduledTasks.isEmpty()) System.out.println("scheduledTasks is empty");
         int i;
         for(i = 0; i < scheduledTasks.size()-1; i++) {
             System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
