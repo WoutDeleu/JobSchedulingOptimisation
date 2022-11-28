@@ -410,7 +410,6 @@ public class main {
         }
         // todo: remove
     }
-
     private static int scheduleTask(Task t, int previous_index, int index) {
         if(t instanceof Setup) {
             t.setStartDate(((Job) t).getReleaseDate());
@@ -428,54 +427,6 @@ public class main {
         }
     }
 
-    private static void scheduleJob_EndOfLine_WithouthSetup(Job job, Setup setup) {
-        // If scheduled is not empty - there needs to be a setup
-        if(!scheduledTasks.isEmpty()) {
-            Task previous = scheduledTasks.getLast();
-
-            // Schedule setup
-            int startingDateSetup = previous.finishDate+1;
-            int durationSetup = setup.getDuration();
-            for (UnavailablePeriod up : unavailablePeriods) {
-                // Break: when slot is found to plan the setup
-                // Does setup lie before up?
-                if(startingDateSetup + durationSetup-1 < up.getStartDate()) {
-                    break; // can be scheduled starting from this startDate
-                }
-                else {
-                    startingDateSetup = Math.max(up.getFinishDate() + 1, startingDateSetup);
-                }
-            }
-
-            // Schedule job
-            // Point from which job can be scheduled
-            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup);
-            int durationJob = job.getDuration();
-            for(UnavailablePeriod up : unavailablePeriods) {
-                // Break: when slot is found to plan the job
-                if (startingDateJob < up.getStartDate() && startingDateJob + durationJob < up.getStartDate()) break;
-                else {
-                    startingDateJob = Math.max(up.getFinishDate() + 1, startingDateJob);
-                }
-            }
-            planJobSetup(setup, startingDateSetup, job, startingDateJob);
-        }
-        // If the list is empty, no need to take setup in account
-        else {
-            // List is empty
-            // Make sure job is scheduled in first possible slot (no unavailable periods)
-            int duration = job.getDuration();
-            int startingDate = job.getReleaseDate();
-            for(UnavailablePeriod up : unavailablePeriods) {
-                // Break: when slot is found to plan the job
-                if(startingDate < up.getStartDate() && startingDate + duration-1 < up.getStartDate()) break;
-                else {
-                    startingDate = up.getFinishDate() + 1;
-                }
-            }
-            planJob(job, startingDate);
-        }
-    }
     //function to execute one of the basic operations on the temporary solution
     public static void executeRandomBasicOperation(){
         Random rand = new Random();
