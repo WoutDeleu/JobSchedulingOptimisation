@@ -35,10 +35,20 @@ XXX. 2 basisoperaties implementeren!! (based on those, expand functionality)
               om zo terug nieuwe opties te kunnen verkennen
 
 
-Todo:
-- insert enkel in gebied tussen release and startDate
+Todo 28/11
+- momenteel run ik gwn nog eens calculateStartTimes() op onze initial solution,
+  dus da zou een valid resultaat moeten geven, maar da is nie het geval
+- we slaan ook onze oldScheduling op maar da zijn verwijzingen naar dezelfde objecten,
+  dus als we de starttijden daarin aanpassen tijdens onze localSearch kloppen die niet meer
+  => als we terug gaan naar de oude scheduling nog eens die startTijden berekenen :( klinkt traag
+- localSearch kunnen runnen en door de validator geraken.
+- feasibleInserts()
+
+
+
 
 Extra:
+- insert enkel in gebied tussen release and startDate
 - beste oplossing (linkedlist) bijhouden zodat we slechtere oplossingen kunnen testen
 - counters to see with margins
 - in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte

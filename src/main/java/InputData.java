@@ -77,6 +77,7 @@ public class InputData {
     public double getWeightDuration() {
         return weightDuration;
     }
+    public String getName() {return name;}
 
     public List<UnavailablePeriod> getUnavailablePeriods() {
         return unavailablePeriods;

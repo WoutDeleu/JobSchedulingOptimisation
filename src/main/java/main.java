@@ -1,22 +1,23 @@
-import javax.print.attribute.standard.JobName;
-import java.sql.SQLOutput;
 import java.util.*;
-
 
 public class main {
 
-    static LinkedList<Task> scheduledTasks = new LinkedList<>();
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
+    private static LinkedList<Task> scheduledTasks = new LinkedList<>();
+    private static LinkedList<Task> bestSchedule = new LinkedList<>();
+
     private static List<Job> jobs = new LinkedList<>();
     private static SetupList setups;
     private static List<UnavailablePeriod> unavailablePeriods;
+
     private static int horizon;
-    private static double currentBestValue;
     private static double weight;
+    private static double currentBestValue;
+//    private static double currentValue;
 
-    public static void main(String[] args) throws Exception {
 
-//        InputData inputData = InputData.readFile("datasets/eigen_dataset.json");
+    public static void main(String[] args) {
+
         InputData inputData = InputData.readFile("datasets/A-100-30.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
@@ -24,22 +25,19 @@ public class main {
         horizon = inputData.getHorizon();
         weight = inputData.getWeightDuration();
 
-        System.out.println(unavailablePeriods);
 
         calculateInitialSolution(setups, jobs);
-        //inputData.printSetupMatrix();
+        printScheduledTasks("Initial solution, cost="+currentBestValue);
+        //localSearch();
 
-        //illustrateBasicFunctions();
-        testLocalSearch();
+        if(isContinuityCorrect()) System.out.println("Continuity check has great succes");
 
-        if(!isContinuityCorrect()) System.out.println("Squirrel");
-
-        double cost = calculateCost();
+        calculateStartTimes();
 
 
         // Write to JSON-file
-        //OutputData outputData = InputData.generateOutput("A-100-30", cost, scheduledTasks);
-        //InputData.writeFile("calculatedSolution/sol_A-100-30.json", outputData);
+        OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
+        InputData.writeFile("calculatedSolution/sol_"+inputData.getName()+".json", outputData);
 
 
     }
@@ -76,6 +74,7 @@ public class main {
             scheduledTasks.removeLast();
             queueJob(j);
         }
+        currentBestValue = calculateCost();
     }
 
     private static void scheduleJob_EndOfLine(Job job, SetupList setups) {
@@ -156,22 +155,24 @@ public class main {
     }
 
     private static void queueJob(Job job) {
-        waitingJobs.addLast(job);
+        waitingJobs.add(job);
+        job.setJobSkipped();
     }
 
 
 
     /*********************************** BASIC OPERATIONS ***********************************/
     public static void operation_deleteJob(int index) {
-        System.out.println("Remove Job " + index);
+
         if(scheduledTasks.isEmpty()) return;
 
         Task task = scheduledTasks.get(index);
+        System.out.println("DELETE "+task+" on index " + index);
 
         assert task.getClass()==Job.class : "Can't remove a setup with an operation: delete job";
         assert index>=0 : "No negative index allowed";
 
-        waitingJobs.add((Job) task);
+        queueJob((Job) task);
 
         if(index != 0) {
             // Remove job and setup necessary for that job
@@ -191,11 +192,19 @@ public class main {
             scheduledTasks.remove(index);
         }
     }
+    public static void operation_deleteJobWithObject(Job job){
+        if (scheduledTasks.contains(job)) {
+            operation_deleteJob(scheduledTasks.indexOf(job));
+        }
+        else {
+            System.out.println(job+" was already deleted");
+        }
+    }
     // Assisting function for makeFeasible()
     public static void operation_deleteSetup(int index) {
-        System.out.println("Delete Setup " + index);
         if(scheduledTasks.size()<2) return;
         Task task = scheduledTasks.get(index);
+        System.out.println("DELETE "+task+" on index " + index);
 
         assert task.getClass()==Setup.class : "Can't remove a job with an operation: delete setup";
         assert index>0 : "No negative index or index zero allowed";
@@ -203,7 +212,7 @@ public class main {
         // Remove setup and it's corresponding job
         scheduledTasks.remove(index);
         Job job = (Job) scheduledTasks.get(index);
-        waitingJobs.add(job);
+        queueJob(job);
         scheduledTasks.remove(job);
 
         // Adapt neighbouring setup
@@ -212,6 +221,14 @@ public class main {
         if (j2 != null) { // j2 == null if the last setup was removed
             Job j1 = (Job) scheduledTasks.get(index-1);
             scheduledTasks.set(index, setups.getSetup(j1, j2));
+        }
+    }
+    public static void operation_deleteSetupWithObject(Setup setup) {
+        if (scheduledTasks.contains(setup)) {
+            operation_deleteSetup(scheduledTasks.indexOf(setup));
+        }
+        else {
+            System.out.println(setup+" was already deleted");
         }
     }
 
@@ -302,23 +319,23 @@ public class main {
     /*********************************** LOCAL SEARCH ***********************************/
 
 
-    public static void localSearch(int x) {
+    public static void localSearch() {
         // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
-        currentBestValue = Double.MAX_VALUE;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
-        while(i<1000) {
-//            System.out.println("while loop iteration: "+i);
-//            System.out.println("grootte van de wachtlijst "+waitingJobs.size());
-//            System.out.println("grootte van de scheduled list "+scheduledTasks.size());
-            executeRandomBasicOperation();
+         while(i<1) {
+             LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
+             LinkedList<Job> oldWaiting = new LinkedList<>(waitingJobs);
+             executeRandomBasicOperation();
 //            if(i%x==0){
-//                LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
+
+                System.out.println("start calculateStartTimes()");
                 calculateStartTimes();
+                System.out.println("start makeFeasibleUPs()");
                 makeFeasibleUPs(0);
 
-                ///////// hier nog feasible inserts functie invoegen
+               // TODO feasible inserts
 //                System.out.println(waitingJobs.size());
 //                for (Job j: waitingJobs) {
 //                    feasibleInsert(j);
@@ -328,11 +345,16 @@ public class main {
 //                System.out.println("feasible inserts took place");
 
                 double tempCost = calculateCost();
-//                if (currentBestValue>tempCost) currentBestValue=tempCost;
-//                else scheduledTasks = oldScheduling;
+                if (currentBestValue>tempCost) currentBestValue=tempCost;
+                else {
+                    System.out.println("Reset old");
+                    scheduledTasks = oldScheduling;
+                    waitingJobs = oldWaiting;
+                }
 
 //            }
             i++;
+            printScheduledTasks("local search, cost="+currentBestValue);
 
         }
     }
@@ -343,27 +365,26 @@ public class main {
         switch(rand.nextInt(3)){
             case 0:
                 if(scheduledTasks.size() > waitingJobs.size()){
-                    System.out.println("Delete");
                     operation_deleteJob(randomJobIndex()); break;
                 }
             case 1:
                 int i1 = randomJobIndex();
                 int i2 = randomJobIndex();
-                System.out.print("Swapping: ");
-                System.out.println("i1: "+i1+", i2 : "+i2);
+//                System.out.print("Swapping: ");
+//                System.out.println("i1: "+i1+", i2 : "+i2);
                 operation_swapJobs(i1, i2);
                 break;
             case 2: // insert
                 if(!waitingJobs.isEmpty()) {
                     int waitingIndex = rand.nextInt(waitingJobs.size());
                     int index = randomJobIndex();
-                    System.out.print("Insertion: ");
-                    System.out.println(index+"," + waitingIndex);
+//                    System.out.print("Insertion: ");
+//                    System.out.println(index+"," + waitingIndex);
                     operation_insertJob(index, waitingJobs.get(waitingIndex));
                 }
                 break;
         }
-        printScheduledTasks();
+//        printScheduledTasks();
     }
 
     public static int randomJobIndex() {
@@ -388,8 +409,8 @@ public class main {
             }
         }
         for (Task t : toRemove) {
-            if (t instanceof Job j) operation_deleteJob(scheduledTasks.indexOf(j));
-            else if (t instanceof Setup s) operation_deleteSetup(scheduledTasks.indexOf(s));
+            if (t instanceof Job j) operation_deleteJobWithObject(j);
+            else if (t instanceof Setup s) operation_deleteSetupWithObject(s);
             else throw new IllegalStateException("Class klopt niet");
         }
     }
@@ -402,46 +423,25 @@ public class main {
         return (double) Math.round(cost * 100) / 100;
     }
 
+    // Removes tasks that are not date feasible
     public static void calculateStartTimes() {
-        System.out.println("start calculate start times");
         int timer=0;
-        LinkedList<Job> jobsToRemove = new LinkedList<>();
-        LinkedList<Setup> setupsToRemove = new LinkedList<>();
+        LinkedList<Task> toRemove = new LinkedList<>();
         for (Task task: scheduledTasks) {
             task.setEarliestStartDate(timer);
             task.calculateFinishDate();
-            if (task.isFeasibleDates()) {
-                timer = task.getFinishDate()+1;
-            }
-            else {
-                if (task instanceof Job j) {
-                    jobsToRemove.add(j);
-                }
-                else if(task instanceof Setup s) {
-                    setupsToRemove.add(s);
-                }
-                else {
-                    throw new IllegalStateException("Klasse klopt niet"+ task.getClass());
-                }
-
-            }
+            if (task.isFeasibleDates()) timer = task.getFinishDate()+1;
+            else toRemove.add(task);
+        }
+        for (Task t : toRemove) {
+            if (t instanceof Job j) operation_deleteJobWithObject(j);
+            else if (t instanceof Setup s) operation_deleteSetupWithObject(s);
+            else throw new IllegalStateException("Class klopt niet");
         }
 
-        System.out.println("Jobs to remove: "+ jobsToRemove.size()+", Setups to remove: "+ setupsToRemove.size());
-        System.out.println("Remove Jobs");
-        for (Job job: jobsToRemove) {
-            operation_deleteJob(scheduledTasks.indexOf(job));
-        }
-        System.out.println("Remove Setups");
-        for (Setup setup: setupsToRemove) {
-            operation_deleteSetup(scheduledTasks.indexOf(setup));
-        }
-        System.out.println("End of calculate start times");
+//        System.out.println("End of calculate start times");
     }
 
-    public static boolean checkJobFeasible(Job job){
-        return job.getReleaseDate() > job.getStartDate() + job.getDuration();
-    }
 
     public static void feasibleInsert(Job job) {
         //alle jobs overlopen behalve de laatste
@@ -483,14 +483,14 @@ public class main {
 
     /*********************************** Prints ***********************************/
     public static void printScheduledTasks(String comment) {
-        System.out.println(comment+":");
+        System.out.print(comment+": \t");
         printScheduledTasks();
     }
     public static void printScheduledTasks() {
         if(scheduledTasks.isEmpty()) System.out.println("scheduledTasks is empty");
         int i;
         for(i = 0; i < scheduledTasks.size()-1; i++) {
-            System.out.print(i + ": " + scheduledTasks.get(i) + " -> " );
+            System.out.print(i + ": " + scheduledTasks.get(i) + " ->\t" );
         }
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
@@ -543,19 +543,8 @@ public class main {
         operation_swapJobs(2, 4);
         printScheduledTasks("Swapped second and third");
     }
-    public static void testLocalSearch() {
-        System.out.println("**************************** Local Search ************************************");
-//        localSearchDelete(1, unavailablePeriods);
-//        localSearchInsert(1, unavailablePeriods);
-//        localSearchSwap(1, unavailablePeriods);
 
-
-        printScheduledTasks("Original data");
-        localSearch(20);
-        printScheduledTasks("first local search attempt");
-    }
-
-    // Functions checks if the structure job - setup - job is preserved
+    // Function checks if the structure job - setup - job is preserved
     public static boolean isContinuityCorrect() {
         assert scheduledTasks.get(0).getClass() == Job.class;
         boolean previousWasSetup = true;
@@ -576,7 +565,6 @@ public class main {
                 else return false;
             }
         }
-        System.out.println("Continuity check has great Succes");
         return true;
     }
     /*********************************** TESTING ***********************************/
