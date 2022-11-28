@@ -37,12 +37,11 @@ public class main {
 
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
-        InputData.writeFile("calculatedSolution/sol_"+inputData.getName()+".json", outputData);
+        InputData.writeFile("calculatedSolution/sol_" + inputData.getName()+".json", outputData);
 
 
     }
     /*********************************** INITIAL SOLUTION ***********************************/
-
     public static void calculateInitialSolution(SetupList setups, List<Job> jobs) {
         boolean maxReached = false;
         for(Job job : jobs) {
@@ -317,9 +316,7 @@ public class main {
 
 
     /*********************************** LOCAL SEARCH ***********************************/
-
-
-    public static void localSearch() {
+    public static void localSearch(int x) {
         // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
@@ -358,7 +355,6 @@ public class main {
 
         }
     }
-
     //function to execute one of the basic operations on the temporary solution
     public static void executeRandomBasicOperation(){
         Random rand = new Random();
@@ -479,6 +475,7 @@ public class main {
         int newDuration = s1.getDuration() + jInsert.getDuration() + s2.getDuration();
         return oldDuration >= newDuration;
     }
+    /*********************************** LOCAL SEARCH ***********************************/
 
 
     /*********************************** Prints ***********************************/
