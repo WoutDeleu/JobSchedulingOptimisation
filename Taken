@@ -39,12 +39,17 @@ Todo:
 - insert enkel in gebied tussen release and startDate
 
 Extra:
-
+- beste oplossing (linkedlist) bijhouden zodat we slechtere oplossingen kunnen testen
 - counters to see with margins
 - in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte
         => ZAL VOORAL ZIJN OBV DE VANAF!!!!! (van tot einde....)
 - op basis van de lengte van wachtlijst meer inserts of meer deletes gaan doorvoeren
+- swaps binnen bepaald gebied houden
+- inserts ongeveer op de juiste plaats (kijken naar huidige startTimes en kiezen om in te voegen op juiste plaats)
 - 3-opt operatie => Swap uitbreiden
 - ruin en recreate (ruin tussen twee UP' s?)
+- local search uitbreiden met annealing
+- parameters tweaken => kijken naar costs in excel
 - zowel steepest decent als hill climbing proberen en zien wat beste resultaat geeft
         => niet veel aan te passen in de code om te wisselen tussen de twee
+-

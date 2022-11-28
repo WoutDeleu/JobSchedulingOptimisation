@@ -190,7 +190,6 @@ public class main {
             if (scheduledTasks.size()>=2) scheduledTasks.remove(index);
             scheduledTasks.remove(index);
         }
-
     }
     // Assisting function for makeFeasible()
     public static void operation_deleteSetup(int index) {
@@ -214,8 +213,9 @@ public class main {
             Job j1 = (Job) scheduledTasks.get(index-1);
             scheduledTasks.set(index, setups.getSetup(j1, j2));
         }
-
     }
+
+
     public static void operation_insertJob(int index, Job job) {
         System.out.println("Insert Job "  + job.getId() + " on position " + index);
         assert !scheduledTasks.contains(job) : "The job was already scheduled";
@@ -308,13 +308,13 @@ public class main {
         int i=0;
         currentBestValue = Double.MAX_VALUE;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
-        while(i<100) {
+        while(i<1000) {
 //            System.out.println("while loop iteration: "+i);
 //            System.out.println("grootte van de wachtlijst "+waitingJobs.size());
 //            System.out.println("grootte van de scheduled list "+scheduledTasks.size());
             executeRandomBasicOperation();
 //            if(i%x==0){
-                LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
+//                LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
                 calculateStartTimes();
                 makeFeasibleUPs(0);
 
@@ -328,8 +328,8 @@ public class main {
 //                System.out.println("feasible inserts took place");
 
                 double tempCost = calculateCost();
-                if (currentBestValue>tempCost) currentBestValue=tempCost;
-                else scheduledTasks = oldScheduling;
+//                if (currentBestValue>tempCost) currentBestValue=tempCost;
+//                else scheduledTasks = oldScheduling;
 
 //            }
             i++;
@@ -379,13 +379,18 @@ public class main {
 
     // Removes scheduled task which clash with the unavailability periods
     public static void makeFeasibleUPs(int start) {
+        LinkedList<Task> toRemove = new LinkedList<>();
         for(int i=start; i<scheduledTasks.size(); i++) {
             Task task = scheduledTasks.get(i);
 
             if(!task.isFeasibleUPs(unavailablePeriods)) {
-                if(task.getClass()==Job.class) operation_deleteJob(i);
-                else operation_deleteSetup(i);
+                toRemove.add(task);
             }
+        }
+        for (Task t : toRemove) {
+            if (t instanceof Job j) operation_deleteJob(scheduledTasks.indexOf(j));
+            else if (t instanceof Setup s) operation_deleteSetup(scheduledTasks.indexOf(s));
+            else throw new IllegalStateException("Class klopt niet");
         }
     }
 
