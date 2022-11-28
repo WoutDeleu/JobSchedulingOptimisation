@@ -33,20 +33,10 @@ public class main {
 
 
         calculateInitialSolution(setups, jobs);
-        System.out.println("********************************BEFORE CALCULATIONS**********************************");
         printScheduledTasks("Initial solution, cost="+currentBestValue);
         //localSearch();
-
         assert(isOrderCorrect()): "Fault in order (job - setup - job)";
         assert(noOverlapUP()): "Fault with overlap in unavailablePeriods";
-
-
-
-        assert(isOrderCorrect()): "Fault in order (job - setup - job)";
-        assert(noOverlapUP()): "Fault with overlap in unavailablePeriods";
-
-        System.out.println("********************************AFTER CALCULATIONS**********************************");
-        printScheduledTasks("Initial solution, cost="+currentBestValue);
 
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
