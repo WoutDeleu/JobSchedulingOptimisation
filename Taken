@@ -62,4 +62,12 @@ Extra:
 - parameters tweaken => kijken naar costs in excel
 - zowel steepest decent als hill climbing proberen en zien wat beste resultaat geeft
         => niet veel aan te passen in de code om te wisselen tussen de twee
--
+
+
+
+Wout Delue progress 28-11
+    -> Deep Clone
+    -> Initiële oplossing omvormen tot combo calculateStartTimes() en makeFeasibleUPs()
+    -> Volgorde omdraaien => ipv zo vroeg mogelijk, zo laat mogelijk
+
+

@@ -55,7 +55,8 @@ public abstract class Task {
     public abstract void setStartDate(int startDate);
     public abstract void setEarliestStartDate(int startDate);
 
-
+    @Override
+    public abstract Task clone();
 
 
 }

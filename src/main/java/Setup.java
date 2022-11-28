@@ -39,14 +39,21 @@ public class Setup extends Task{
     }
 
 
+
     // Setup has no releaseDate and dueDate so is always feasible by its dates
-    public boolean isFeasibleDates() {return true;}
+    public boolean isFeasibleDates() {
+        return true;
+    }
     public void setStartDate(int startDate) { this.startDate = startDate; }
     public void setEarliestStartDate(int startDate) { this.startDate = startDate; }
 
     public void calculateStartAndFinish(Job job) {
         finishDate = job.startDate-1;
         startDate = finishDate-duration+1;
+    }
+    @Override
+    public Setup clone() {
+        return new Setup(this.duration, this.job1, this.job2);
     }
 
     @Override

@@ -32,6 +32,17 @@ public class Job extends Task{
     }
 
     public void setId(int id) { this.id = id; }
+
+    public Job(int startDate, int finishDate, int id, int duration, int releaseDate, int dueDate, double earlinessPenalty, double rejectionPenalty) {
+        super(startDate, finishDate);
+        this.id = id;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.dueDate = dueDate;
+        this.earlinessPenalty = earlinessPenalty;
+        this.rejectionPenalty = rejectionPenalty;
+    }
+
     public void setDuration(int duration) {
         this.duration = duration;
     }
@@ -62,7 +73,10 @@ public class Job extends Task{
         this.startDate =  Math.max(startDate, releaseDate);
     }
 
-
+    @Override
+    public Job clone() {
+        return new Job(-1, -1, this.id, this.duration, this.releaseDate, this.dueDate, this.earlinessPenalty, this.rejectionPenalty);
+    }
 
     public boolean makesDueDate(int startingTime) {
         return startingTime + duration <= dueDate;
