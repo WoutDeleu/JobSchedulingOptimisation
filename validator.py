@@ -266,7 +266,7 @@ class Validator:
             time += instance.jobs[j].dur
             k = self.validate_time(instance, time-1)
             if k >= 0:
-                self.add_error("Completion time of job %d is %d which lies within unavailability period [%d,%d]" % (j, time, instance.unav[k].start, instance.unav[k].end))
+                self.add_error("Completion time of job %d is %d which lies within unavailability period [%d,%d]" % (j, time-1, instance.unav[k].start, instance.unav[k].end))
                 valid = False
 
             solution.pen_earl += instance.jobs[j].ep*(instance.jobs[j].period.end - time + 1)
@@ -322,7 +322,7 @@ class Validator:
 
         valid = self.validate_sequence(instance, solution)
 
-        if abs(solution.cost() - solution.of_read) > 0.009:
+        if abs(solution.cost() - solution.of_read) > 0.01:
             self.add_error("Solution cost reported is %.2f but I computed %.2f (rejection: %.2f + earliness: %.2f + duration: %.2f)" % (solution.of_read, solution.cost(), solution.pen_rejec, solution.pen_earl, solution.pen_dur))
             valid = False
 

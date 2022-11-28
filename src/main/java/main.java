@@ -9,6 +9,7 @@ public class main {
     private static LinkedList<Job> waitingJobs = new LinkedList<>();
     private static List<Job> jobs = new LinkedList<>();
     private static SetupList setups;
+    private static List<UnavailablePeriod> unavailablePeriods;
     private static int horizon;
     private static double currentBestValue;
     private static double weight;
@@ -19,19 +20,19 @@ public class main {
         InputData inputData = InputData.readFile("datasets/A-100-30.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
-        List<UnavailablePeriod> unavailablePeriods = inputData.getUnavailablePeriods();
+        unavailablePeriods = inputData.getUnavailablePeriods();
         horizon = inputData.getHorizon();
         weight = inputData.getWeightDuration();
 
         System.out.println(unavailablePeriods);
 
-        calculateInitialSolution(setups, jobs, unavailablePeriods);
+        calculateInitialSolution(setups, jobs);
         //inputData.printSetupMatrix();
 
         //illustrateBasicFunctions();
-        testLocalSearch(unavailablePeriods);
+        testLocalSearch();
 
-
+        if(!isContinuityCorrect()) System.out.println("Squirrel");
 
         double cost = calculateCost();
 
@@ -42,73 +43,9 @@ public class main {
 
 
     }
-    /*********************************** TESTING ***********************************/
-
-    public static void illustrateBasicFunctions()  {
-        //testDeleteJob();
-        testDeleteSetup();
-        testInsertJob();
-        testSwapJobs();
-    }
-
-    public static void testDeleteJob() {
-        System.out.println("**************************** Delete job ************************************");
-        printScheduledTasks("Original data");
-        operation_deleteJob(2);
-        printScheduledTasks("Deleted job in the middle");
-        operation_deleteJob(4);
-        printScheduledTasks("Deleted last job");
-        operation_deleteJob(0);
-        printScheduledTasks("Deleted first job");
-    }
-
-    public static void testDeleteSetup() {
-        System.out.println("*************************** Delete setup ***********************************");
-        printScheduledTasks("Original data");
-        operation_deleteSetup(3);
-        printScheduledTasks("Deleted setup in the middle");
-        operation_deleteSetup(3);
-        printScheduledTasks("Deleted last setup");
-        operation_deleteSetup(1);
-        printScheduledTasks("Deleted first setup");
-    }
-
-    public static void testInsertJob() {
-        System.out.println("****************************** Insert **************************************");
-        printScheduledTasks("Original data");
-        operation_insertJob(10, waitingJobs.get(0));
-        printScheduledTasks("Inserted job at the end");
-        operation_insertJob(0, waitingJobs.get(0));
-        printScheduledTasks("Inserted job at the start");
-        operation_insertJob(3, waitingJobs.get(0));
-        printScheduledTasks("Inserted job in the middle");
-    }
-
-    public static void testSwapJobs() {
-        System.out.println("******************************* Swap ***************************************");
-        printScheduledTasks("Original data");
-        operation_swapJobs(0, 6);
-        printScheduledTasks("Swapped first and last");
-        operation_swapJobs(2, 4);
-        printScheduledTasks("Swapped second and third");
-    }
-
-    public static void testLocalSearch(List<UnavailablePeriod> unavailablePeriods) {
-        System.out.println("**************************** Local Search ************************************");
-//        localSearchDelete(1, unavailablePeriods);
-//        localSearchInsert(1, unavailablePeriods);
-//        localSearchSwap(1, unavailablePeriods);
-
-
-        printScheduledTasks("Original data");
-        localSearch(20, unavailablePeriods);
-        printScheduledTasks("first local search attempt");
-    }
-
-
     /*********************************** INITIAL SOLUTION ***********************************/
 
-    public static void calculateInitialSolution(SetupList setups, List<Job> jobs, List<UnavailablePeriod> unavailablePeriods) {
+    public static void calculateInitialSolution(SetupList setups, List<Job> jobs) {
         boolean maxReached = false;
         for(Job job : jobs) {
             if(!scheduledTasks.isEmpty()) { // In case of first job, we can't reach previous job
@@ -125,11 +62,11 @@ public class main {
                     queueJob(previous);
                 }
                 else {
-                    scheduleJob_EndOfLine(job, setups, unavailablePeriods);
+                    scheduleJob_EndOfLine(job, setups);
                 }
             }
             else {
-                scheduleJob_EndOfLine(job, setups, unavailablePeriods);
+                scheduleJob_EndOfLine(job, setups);
             }
         }
         if(scheduledTasks.getLast().getFinishDate() > horizon) {
@@ -141,7 +78,7 @@ public class main {
         }
     }
 
-    private static void scheduleJob_EndOfLine(Job job, SetupList setups, List<UnavailablePeriod> unavailablePeriods) {
+    private static void scheduleJob_EndOfLine(Job job, SetupList setups) {
         // If scheduled is not empty - there needs to be a setup
         if(!scheduledTasks.isEmpty()) {
             Task previous = scheduledTasks.getLast();
@@ -225,9 +162,8 @@ public class main {
 
 
     /*********************************** BASIC OPERATIONS ***********************************/
-
     public static void operation_deleteJob(int index) {
-        System.out.println("start delete job");
+        System.out.println("Remove Job " + index);
         if(scheduledTasks.isEmpty()) return;
 
         Task task = scheduledTasks.get(index);
@@ -256,10 +192,9 @@ public class main {
         }
 
     }
-
     // Assisting function for makeFeasible()
     public static void operation_deleteSetup(int index) {
-        System.out.println("start delete setup");
+        System.out.println("Delete Setup " + index);
         if(scheduledTasks.size()<2) return;
         Task task = scheduledTasks.get(index);
 
@@ -281,13 +216,12 @@ public class main {
         }
 
     }
-
     public static void operation_insertJob(int index, Job job) {
-        System.out.println("start insert job");
+        System.out.println("Insert Job "  + job.getId() + " on position " + index);
+        assert !scheduledTasks.contains(job) : "The job was already scheduled";
         operation_insertJobNoWaitingList(index, job);
         waitingJobs.remove(job);
     }
-
     public static void operation_insertJobNoWaitingList(int index, Job job) {
         assert index>=0 : "No negative index allowed";
 
@@ -333,10 +267,10 @@ public class main {
                 scheduledTasks.add(index+1, setups.getSetup(job, j2));
             }
         }
+        assert isContinuityCorrect() : "Order is fucked up";
     }
-
     public static void operation_swapJobs(int i1, int i2) {
-        System.out.println("start swap jobs");
+        System.out.println("Swap jobs on " + i1 + ", " + i2);
 
         // Correct for 2 matching indexes
         if (i1 == i2) {
@@ -361,11 +295,14 @@ public class main {
         operation_insertJob(index1, job2);
         operation_insertJob(index2, job1);
     }
+    /*********************************** BASIC OPERATIONS ***********************************/
+
+
 
     /*********************************** LOCAL SEARCH ***********************************/
 
 
-    public static void localSearch(int x, List<UnavailablePeriod> unavailablePeriods) {
+    public static void localSearch(int x) {
         // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
@@ -379,7 +316,7 @@ public class main {
 //            if(i%x==0){
                 LinkedList<Task> oldScheduling = new LinkedList<>(scheduledTasks);
                 calculateStartTimes();
-                makeFeasibleUPs(0, unavailablePeriods);
+                makeFeasibleUPs(0);
 
                 ///////// hier nog feasible inserts functie invoegen
 //                System.out.println(waitingJobs.size());
@@ -406,11 +343,13 @@ public class main {
         switch(rand.nextInt(3)){
             case 0:
                 if(scheduledTasks.size() > waitingJobs.size()){
+                    System.out.println("Delete");
                     operation_deleteJob(randomJobIndex()); break;
                 }
             case 1:
                 int i1 = randomJobIndex();
                 int i2 = randomJobIndex();
+                System.out.print("Swapping: ");
                 System.out.println("i1: "+i1+", i2 : "+i2);
                 operation_swapJobs(i1, i2);
                 break;
@@ -418,7 +357,8 @@ public class main {
                 if(!waitingJobs.isEmpty()) {
                     int waitingIndex = rand.nextInt(waitingJobs.size());
                     int index = randomJobIndex();
-                    System.out.println(index+","+waitingIndex);
+                    System.out.print("Insertion: ");
+                    System.out.println(index+"," + waitingIndex);
                     operation_insertJob(index, waitingJobs.get(waitingIndex));
                 }
                 break;
@@ -433,11 +373,12 @@ public class main {
             if(jobIndex==scheduledTasks.size()-1) jobIndex--;
             else jobIndex++;
         }
+        assert jobIndex%2==0 : "Job index not even";
         return jobIndex;
     }
 
     // Removes scheduled task which clash with the unavailability periods
-    public static void makeFeasibleUPs(int start, List<UnavailablePeriod> unavailablePeriods) {
+    public static void makeFeasibleUPs(int start) {
         for(int i=start; i<scheduledTasks.size(); i++) {
             Task task = scheduledTasks.get(i);
 
@@ -535,13 +476,11 @@ public class main {
     }
 
 
-    /*********************************** I/O ***********************************/
-
+    /*********************************** Prints ***********************************/
     public static void printScheduledTasks(String comment) {
         System.out.println(comment+":");
         printScheduledTasks();
     }
-
     public static void printScheduledTasks() {
         if(scheduledTasks.isEmpty()) System.out.println("scheduledTasks is empty");
         int i;
@@ -550,9 +489,92 @@ public class main {
         }
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
+    /*********************************** Prints ***********************************/
 
+
+
+    /*********************************** TESTING ***********************************/
+    public static void illustrateBasicFunctions()  {
+        //testD eleteJob();
+        testDeleteSetup();
+        testInsertJob();
+        testSwapJobs();
+    }
+    public static void testDeleteJob() {
+        System.out.println("**************************** Delete job ************************************");
+        printScheduledTasks("Original data");
+        operation_deleteJob(2);
+        printScheduledTasks("Deleted job in the middle");
+        operation_deleteJob(4);
+        printScheduledTasks("Deleted last job");
+        operation_deleteJob(0);
+        printScheduledTasks("Deleted first job");
+    }
+    public static void testDeleteSetup() {
+        System.out.println("*************************** Delete setup ***********************************");
+        printScheduledTasks("Original data");
+        operation_deleteSetup(3);
+        printScheduledTasks("Deleted setup in the middle");
+        operation_deleteSetup(3);
+        printScheduledTasks("Deleted last setup");
+        operation_deleteSetup(1);
+        printScheduledTasks("Deleted first setup");
+    }
+    public static void testInsertJob() {
+        System.out.println("****************************** Insert **************************************");
+        printScheduledTasks("Original data");
+        operation_insertJob(10, waitingJobs.get(0));
+        printScheduledTasks("Inserted job at the end");
+        operation_insertJob(0, waitingJobs.get(0));
+        printScheduledTasks("Inserted job at the start");
+        operation_insertJob(3, waitingJobs.get(0));
+        printScheduledTasks("Inserted job in the middle");
+    }
+    public static void testSwapJobs() {
+        System.out.println("******************************* Swap ***************************************");
+        printScheduledTasks("Original data");
+        operation_swapJobs(0, 6);
+        printScheduledTasks("Swapped first and last");
+        operation_swapJobs(2, 4);
+        printScheduledTasks("Swapped second and third");
+    }
+    public static void testLocalSearch() {
+        System.out.println("**************************** Local Search ************************************");
+//        localSearchDelete(1, unavailablePeriods);
+//        localSearchInsert(1, unavailablePeriods);
+//        localSearchSwap(1, unavailablePeriods);
+
+
+        printScheduledTasks("Original data");
+        localSearch(20);
+        printScheduledTasks("first local search attempt");
+    }
+
+    // Functions checks if the structure job - setup - job is preserved
+    public static boolean isContinuityCorrect() {
+        assert scheduledTasks.get(0).getClass() == Job.class;
+        boolean previousWasSetup = true;
+        boolean previousWasJob = false;
+        for(Task t : scheduledTasks) {
+            if(previousWasSetup) {
+                if(t.getClass() == Job.class) {
+                    previousWasJob  =true;
+                    previousWasSetup = false;
+                }
+                else return false;
+            }
+            else if(previousWasJob) {
+                if(t.getClass() == Setup.class) {
+                    previousWasSetup = true;
+                    previousWasJob = false;
+                }
+                else return false;
+            }
+        }
+        System.out.println("Continuity check has great Succes");
+        return true;
+    }
+    /*********************************** TESTING ***********************************/
 
 }
-
-
 
