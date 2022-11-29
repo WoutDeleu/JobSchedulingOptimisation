@@ -333,6 +333,7 @@ public class main {
                 previous_index = fitJob_EOL(t, previous_index);
             }
         }
+        if(previous_index == scheduledTasks.size() -2) previous_index++;
         Task lastScheduled = scheduledTasks.get(previous_index);
         // No need to schedule a setup whe there is no job following
         if(lastScheduled instanceof Setup) {
@@ -341,8 +342,8 @@ public class main {
             lastScheduled = scheduledTasks.get(previous_index);
         }
         if(lastScheduled.getFinishDate() > horizon) {
-            toRemove.add(scheduledTasks.get(previous_index-1));
             toRemove.add(lastScheduled);
+            toRemove.add(scheduledTasks.get(previous_index-1));
         }
         cleanUpSchedule(toRemove);
     }
@@ -401,7 +402,6 @@ public class main {
          while(i<100) {
              LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
              LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
-             printScheduledTasks();
              executeRandomBasicOperation();
              assert isOrderCorrect() : "Order is fucked up";
 //            if(i%x==0){
@@ -432,7 +432,6 @@ public class main {
 
         }
     }
-
     //function to execute one of the basic operations on the temporary solution
     public static void executeRandomBasicOperation(){
         Random rand = new Random();
@@ -680,6 +679,7 @@ public class main {
                 queueJob((Job) t);
             }
         }
+        assert isOrderCorrect() : "Order is fucked up";
     }
     /*********************************** UTIL ***********************************/
 }
