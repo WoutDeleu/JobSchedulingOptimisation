@@ -268,11 +268,9 @@ public class main {
                 scheduledTasks.add(index+1, setups.getSetup(job, j2));
             }
         }
-        assert isOrderCorrect() : "Order is fucked up";
     }
     public static void operation_swapJobs(int i1, int i2) {
         System.out.println("Swap jobs on " + i1 + ", " + i2);
-        assert isOrderCorrect() : "Order is fucked up";
 
         // Correct for 2 matching indexes
         if (i1 == i2) {
@@ -404,6 +402,7 @@ public class main {
              LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
              LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
              executeRandomBasicOperation();
+             assert isOrderCorrect() : "Order is fucked up";
 //            if(i%x==0){
 
 
@@ -462,11 +461,7 @@ public class main {
     }
     public static int randomJobIndex() {
         Random rand = new Random();
-        int jobIndex = rand.nextInt(scheduledTasks.size());
-        if (!(scheduledTasks.get(jobIndex) instanceof Job)) {
-            if(jobIndex==scheduledTasks.size()-1) jobIndex--;
-            else jobIndex++;
-        }
+        int jobIndex = rand.nextInt((scheduledTasks.size()+1)/2)*2;
         assert jobIndex%2==0 : "Job index not even";
         return jobIndex;
     }
@@ -612,7 +607,7 @@ public class main {
         for(Task t : scheduledTasks) {
             if(previousWasSetup) {
                 if(t.getClass() == Job.class) {
-                    previousWasJob  =true;
+                    previousWasJob = true;
                     previousWasSetup = false;
                 }
                 else {
