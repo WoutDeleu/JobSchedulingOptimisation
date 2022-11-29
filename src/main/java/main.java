@@ -272,6 +272,7 @@ public class main {
     }
     public static void operation_swapJobs(int i1, int i2) {
         System.out.println("Swap jobs on " + i1 + ", " + i2);
+        assert isOrderCorrect() : "Order is fucked up";
 
         // Correct for 2 matching indexes
         if (i1 == i2) {
@@ -399,7 +400,7 @@ public class main {
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
-         while(i<1) {
+         while(i<100) {
              LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
              LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
              executeRandomBasicOperation();
@@ -614,14 +615,20 @@ public class main {
                     previousWasJob  =true;
                     previousWasSetup = false;
                 }
-                else return false;
+                else {
+                    System.out.println("Fault Setup: "  + ((Setup) t).getJob1() + " -> " + ((Setup) t).getJob2());
+                    return false;
+                }
             }
             else if(previousWasJob) {
                 if(t.getClass() == Setup.class) {
                     previousWasSetup = true;
                     previousWasJob = false;
                 }
-                else return false;
+                else {
+                    System.out.println("Fault Job: Id="  + ((Job) t).getId() + ", index=" + scheduledTasks.indexOf(t));
+                    return false;
+                }
             }
         }
         return true;
@@ -647,9 +654,6 @@ public class main {
             }
         }
          return true;
-    }
-    public static void findDifferencesClone() {
-
     }
     /*********************************** TESTING ***********************************/
 
