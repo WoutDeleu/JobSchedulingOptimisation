@@ -16,6 +16,13 @@ public class Setup extends Task{
         this.job1 = job1;
         this.job2 = job2;
     }
+    public Setup(int startDate, int finishDate, int duration, int job1, int job2) {
+        this.startDate = startDate;
+        this.finishDate = finishDate;
+        this.duration = duration;
+        this.job1 = job1;
+        this.job2 = job2;
+    }
 
     public int getDuration() {
         return duration;
@@ -53,7 +60,7 @@ public class Setup extends Task{
     }
     @Override
     public Setup clone() {
-        return new Setup(this.duration, this.job1, this.job2);
+        return new Setup(this.startDate, this.finishDate, this.duration, this.job1, this.job2);
     }
 
     @Override

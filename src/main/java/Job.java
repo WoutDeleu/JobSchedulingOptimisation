@@ -75,7 +75,7 @@ public class Job extends Task{
 
     @Override
     public Job clone() {
-        return new Job(-1, -1, this.id, this.duration, this.releaseDate, this.dueDate, this.earlinessPenalty, this.rejectionPenalty);
+        return new Job(this.startDate, this.finishDate, this.id, this.duration, this.releaseDate, this.dueDate, this.earlinessPenalty, this.rejectionPenalty);
     }
 
     public boolean makesDueDate(int startingTime) {

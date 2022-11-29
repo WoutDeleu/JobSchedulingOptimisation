@@ -18,22 +18,18 @@ public class main {
 
     public static void main(String[] args) {
 
-        InputData inputData = InputData.readFile("datasets/A-400-90.json");
+        InputData inputData = InputData.readFile("datasets/B-400-90.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         unavailablePeriods = inputData.getUnavailablePeriods();
         horizon = inputData.getHorizon();
         weight = inputData.getWeightDuration();
 
-        long startTime = System.currentTimeMillis();
         calculateInitialSolution(setups, jobs);
-//        printScheduledTasks("Initial solution, cost="+currentBestValue);
-        System.out.println("Initial solution, cost="+currentBestValue);
-        finalizeSchedule_ascending();
         currentBestValue = calculateCost();
-        long timeelapsed = System.currentTimeMillis()-startTime;
-        System.out.println("After finalizing, cost="+currentBestValue + ", timeelapsed: " + timeelapsed);
-        //localSearch();
+
+        localSearch(0);
+
         assert(isOrderCorrect()): "Fault in order (job - setup - job)";
         assert(noOverlapUP()): "Fault with overlap in unavailablePeriods";
 
@@ -351,6 +347,9 @@ public class main {
         }
         cleanUpSchedule(toRemove);
     }
+    public static void finalizeSchedule_descending() {
+
+    }
     // EOL = end of list
     private static int fitJob_EOL(Task task, int previous_index) {
         int startingDate;
@@ -401,15 +400,11 @@ public class main {
         int i=0;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
          while(i<1) {
-             LinkedList<Task> oldScheduling = deepClone(scheduledTasks);
-             LinkedList<Job> oldWaiting = deepCloneJobs(waitingJobs);
+             LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
+             LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
              executeRandomBasicOperation();
 //            if(i%x==0){
 
-/*                System.out.println("start calculateStartTimes()");
-                calculateStartTimes();
-                System.out.println("start makeFeasibleUPs()");
-                makeFeasibleUPs(0);*/
 
                // TODO feasible inserts
 //                System.out.println(waitingJobs.size());
@@ -420,17 +415,19 @@ public class main {
 //                jobsToRemove.forEach(waitingJobs::remove);
 //                System.out.println("feasible inserts took place");
 
+
+             finalizeSchedule_ascending();
                 double tempCost = calculateCost();
                 if (currentBestValue>tempCost) currentBestValue=tempCost;
                 else {
                     System.out.println("Reset old");
-                    scheduledTasks = oldScheduling;
-                    waitingJobs = oldWaiting;
+                    scheduledTasks = deepClone(old_Scheduling);
+                    waitingJobs = deepCloneJobs(old_Waiting);
                 }
 
 //            }
             i++;
-            printScheduledTasks("local search, cost="+currentBestValue);
+//            printScheduledTasks("local search, cost="+currentBestValue);
 
         }
     }
@@ -650,6 +647,9 @@ public class main {
             }
         }
          return true;
+    }
+    public static void findDifferencesClone() {
+
     }
     /*********************************** TESTING ***********************************/
 
