@@ -218,9 +218,16 @@ public class main {
         }
     }
     public static void operation_insertJob(int index, Job job) {
-        System.out.println("Insert Job "  + job.getId() + " on position " + index);
+/*        System.out.println("Insert Job "  + job.getId() + " on position " + index);
         assert !scheduledTasks.contains(job) : "The job was already scheduled";
         operation_insertJobNoWaitingList(index, job);
+        waitingJobs.remove(job);
+*/
+        // todo : this is a work around... doesnt fix the issue
+        if(!scheduledTasks.contains(job)) {
+            System.out.println("Insert Job "  + job.getId() + " on position " + index);
+            operation_insertJobNoWaitingList(index, job);
+        }
         waitingJobs.remove(job);
     }
     public static void operation_insertJobNoWaitingList(int index, Job job) {
@@ -399,7 +406,7 @@ public class main {
         // and validate if the new scheduling is acceptable / better than the original scheduling
         int i=0;
         LinkedList<Job> jobsToRemove = new LinkedList<>();
-         while(i<100) {
+         while(i<10000) {
              LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
              LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
              executeRandomBasicOperation();
