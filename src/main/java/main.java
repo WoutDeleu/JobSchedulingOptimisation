@@ -14,26 +14,25 @@ public class main {
     private static double weight;
     private static double currentBestValue;
 //    private static double currentValue;
-    public static double calculateCost() {
-        double cost = 0;
-        for (Job job : jobs) cost += job.getCost();
-        if (!scheduledTasks.isEmpty()) // add total schedule duration
-            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
-        return (double) Math.round(cost * 100) / 100;
-    }
+
 
     public static void main(String[] args) {
 
-        InputData inputData = InputData.readFile("datasets/A-100-30.json");
+        InputData inputData = InputData.readFile("datasets/A-400-90.json");
         setups = inputData.generateSetupList();
         jobs = inputData.getJobsSortedReleaseDate();
         unavailablePeriods = inputData.getUnavailablePeriods();
         horizon = inputData.getHorizon();
         weight = inputData.getWeightDuration();
 
-
+        long startTime = System.currentTimeMillis();
         calculateInitialSolution(setups, jobs);
-        printScheduledTasks("Initial solution, cost="+currentBestValue);
+//        printScheduledTasks("Initial solution, cost="+currentBestValue);
+        System.out.println("Initial solution, cost="+currentBestValue);
+        finalizeSchedule_ascending();
+        currentBestValue = calculateCost();
+        long timeelapsed = System.currentTimeMillis()-startTime;
+        System.out.println("After finalizing, cost="+currentBestValue + ", timeelapsed: " + timeelapsed);
         //localSearch();
         assert(isOrderCorrect()): "Fault in order (job - setup - job)";
         assert(noOverlapUP()): "Fault with overlap in unavailablePeriods";
@@ -41,8 +40,6 @@ public class main {
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
         InputData.writeFile("calculatedSolution/sol_" + inputData.getName()+".json", outputData);
-
-
     }
 
 
@@ -64,11 +61,11 @@ public class main {
                     queueJob(previous);
                 }
                 else {
-                    scheduleJob_EndOfLine(job, setups);
+                    scheduleAndPlaceJob_EOL(job, setups);
                 }
             }
             else {
-                scheduleJob_EndOfLine(job, setups);
+                scheduleAndPlaceJob_EOL(job, setups);
             }
         }
         if(scheduledTasks.getLast().getFinishDate() > horizon) {
@@ -80,7 +77,8 @@ public class main {
         }
         currentBestValue = calculateCost();
     }
-    private static void scheduleJob_EndOfLine(Job job, SetupList setups) {
+    // EOL = end of list
+    private static void scheduleAndPlaceJob_EOL(Job job, SetupList setups) {
         // If scheduled is not empty - there needs to be a setup
         if(!scheduledTasks.isEmpty()) {
             Task previous = scheduledTasks.getLast();
@@ -88,30 +86,13 @@ public class main {
             // Schedule setup
             int startingDateSetup = previous.finishDate+1;
             Setup setup = setups.getSetup((Job) previous, job);
-            int durationSetup = setup.getDuration();
-            for (UnavailablePeriod up : unavailablePeriods) {
-                // Break: when slot is found to plan the setup
-                // Does setup lie before up?
-                if(startingDateSetup + durationSetup-1 < up.getStartDate()) {
-                    break; // can be scheduled starting from this startDate
-                }
-                else {
-                    startingDateSetup = Math.max(up.getFinishDate() + 1, startingDateSetup);
-                }
-            }
+            startingDateSetup = calculateFittingStartTime_UP(startingDateSetup, setup);
 
             // Schedule job
-            // Point from which job can be scheduled
-            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + durationSetup);
-            int durationJob = job.getDuration();
-            for(UnavailablePeriod up : unavailablePeriods) {
-                // Break: when slot is found to plan the job
-                if (startingDateJob < up.getStartDate() && startingDateJob + durationJob < up.getStartDate()) break;
-                else {
-                    startingDateJob = Math.max(up.getFinishDate() + 1, startingDateJob);
-                }
-            }
-            planJobSetup(setup, startingDateSetup, job, startingDateJob);
+            int startingDateJob = Math.max(job.getReleaseDate(), startingDateSetup + setup.getDuration());
+            startingDateJob = calculateFittingStartTime_UP(startingDateJob, job);
+
+            planAndPlaceJobWithSetup(setup, startingDateSetup, job, startingDateJob);
         }
         // If the list is empty, no need to take setup in account
         else {
@@ -126,10 +107,10 @@ public class main {
                     startingDate = up.getFinishDate() + 1;
                 }
             }
-            planJob(job, startingDate);
+            planAndPlaceJob(job, startingDate);
         }
     }
-    private static void planJobSetup(Setup setup, int startingDateSetup, Job job, int startingDateJob) {
+    private static void planAndPlaceJobWithSetup(Setup setup, int startingDateSetup, Job job, int startingDateJob) {
         if(job.makesDueDate(startingDateJob)) {
             setup.setStartDate(startingDateSetup);
             setup.calculateFinishDate();
@@ -144,7 +125,7 @@ public class main {
         }
     }
     // Plan job to waitingJobs or ScheduledTasks based on whether it makes the deadline
-    public static void planJob(Job job, int startingDate) {
+    public static void planAndPlaceJob(Job job, int startingDate) {
         if(job.makesDueDate(startingDate)) {
             job.setStartDate(startingDate);
             job.calculateFinishDate();
@@ -153,6 +134,14 @@ public class main {
         else {
             queueJob(job);
         }
+    }
+    private static int calculateFittingStartTime_UP(int startingDate, Task task) {
+        int duration = task.getDuration();
+        for(UnavailablePeriod up : unavailablePeriods) {
+            if (startingDate + duration < up.getStartDate()) break;
+            else startingDate = Math.max(up.getFinishDate() + 1, startingDate);
+        }
+        return startingDate;
     }
     private static void queueJob(Job job) {
         waitingJobs.add(job);
@@ -193,7 +182,7 @@ public class main {
             scheduledTasks.remove(index);
         }
     }
-    public static void operation_deleteJobWithObject(Job job){
+    public static void operation_deleteJobUsingObject(Job job){
         if (scheduledTasks.contains(job)) {
             operation_deleteJob(scheduledTasks.indexOf(job));
         }
@@ -315,6 +304,96 @@ public class main {
 
 
 
+    /*********************************** FEASABLE WITH STARTTIMES ***********************************/
+    // Calculates all the starting times and makes the solution feasible
+    public static void finalizeSchedule_ascending() {
+        boolean maxReached = false;
+        List<Task> toRemove = new ArrayList<Task>();
+        int previous_index = - 1;
+        for(Task t : scheduledTasks) {
+            int index = scheduledTasks.indexOf(t);
+            if(previous_index >= 0) {
+                Task previous = scheduledTasks.get(previous_index);
+                if (previous.getFinishDate() == horizon || maxReached) {
+                    if(previous instanceof Setup) {
+                        toRemove.add(previous);
+                    }
+                    toRemove.add(t);
+                }
+                else if (previous.getFinishDate() > horizon) {
+                    maxReached = true;
+                    // Remove last task with everything connected to it
+                    if(previous instanceof Job) {
+                        // Remove the setup before the previous job
+                        toRemove.add(scheduledTasks.get(previous_index-1));
+                    }
+                    toRemove.add(previous);
+                    toRemove.add(t);
+                }
+                else {
+                    previous_index = fitJob_EOL(t, previous_index);
+                }
+            }
+            else {
+                previous_index = fitJob_EOL(t, previous_index);
+            }
+        }
+        Task lastScheduled = scheduledTasks.get(previous_index);
+        // No need to schedule a setup whe there is no job following
+        if(lastScheduled instanceof Setup) {
+            toRemove.add(lastScheduled);
+            previous_index--;
+            lastScheduled = scheduledTasks.get(previous_index);
+        }
+        if(lastScheduled.getFinishDate() > horizon) {
+            toRemove.add(scheduledTasks.get(previous_index-1));
+            toRemove.add(lastScheduled);
+        }
+        cleanUpSchedule(toRemove);
+    }
+    // EOL = end of list
+    private static int fitJob_EOL(Task task, int previous_index) {
+        int startingDate;
+        if(previous_index >= 0) {
+            Task previous = scheduledTasks.get(previous_index);
+            startingDate = previous.getFinishDate() + 1;
+        }
+        else {
+            startingDate = 0;
+        }
+        if(task instanceof Job) startingDate = Math.max(startingDate, ((Job) task).getReleaseDate());
+        startingDate = calculateFittingStartTime_UP(startingDate, task);
+
+        return scheduleTask(task, startingDate, previous_index);
+    }
+    private static int scheduleTask(Task t, int startingDate, int previous_index) {
+        int index =  scheduledTasks.indexOf(t);
+        if(t instanceof Setup) {
+            t.setStartDate(startingDate);
+            t.calculateFinishDate();
+            return index;
+        }
+        else if(((Job) t).makesDueDate(startingDate)) {
+            t.setStartDate(startingDate);
+            t.calculateFinishDate();
+            return index;
+        }
+        else {
+            queueJob((Job) t);
+            return previous_index;
+        }
+    }
+    public static double calculateCost() {
+        double cost = 0;
+        for (Job job : jobs) cost += job.getCost();
+        if (!scheduledTasks.isEmpty()) // add total schedule duration
+            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+        return (double) Math.round(cost * 100) / 100;
+    }
+    /*********************************** FEASABLE WITH STARTTIMES ***********************************/
+
+
+
     /*********************************** LOCAL SEARCH ***********************************/
     public static void localSearch(int x) {
         // x is a parameter to tweak the amount of operations that will be executed before we calculate the starttimes
@@ -353,67 +432,6 @@ public class main {
             i++;
             printScheduledTasks("local search, cost="+currentBestValue);
 
-        }
-    }
-    // Calculates all the starting times and makes the solution feasible
-    public static void finalizeSchedule_ascending() {
-        boolean maxReached = false;
-        List<Task> toRemove = new ArrayList<Task>();
-        int previous_index = - 1;
-        for(Task t : scheduledTasks) {
-            int index = scheduledTasks.indexOf(t);
-            if(previous_index != -1) {
-                Task previous = scheduledTasks.get(previous_index);
-                if (previous.getFinishDate() == horizon || maxReached) {
-                    if(previous instanceof Setup) {
-                        toRemove.add(previous);
-                    }
-                    toRemove.add(t);
-                }
-                else if (previous.getFinishDate() > horizon) {
-                    maxReached = true;
-                    // Remove last job + the linked setup
-                    if(previous instanceof Job) {
-                        // Remove the setup before the previous job
-                        toRemove.add(scheduledTasks.get(previous_index--));
-                    }
-                    toRemove.add(previous);
-                    toRemove.add(t);
-                }
-                else {
-                    previous_index = scheduleTask(t, previous_index, index);
-                }
-            }
-            else {
-                assert t instanceof Job: "First job was a setup...";
-                // todo: UP checken
-                scheduleTask(t, previous_index, index);
-            }
-        }
-        // todo:::
-        if(scheduledTasks.getLast().getFinishDate() > horizon) {
-            Job j = (Job) scheduledTasks.getLast();
-            // Remove last job + the linked setup
-            scheduledTasks.removeLast();
-            scheduledTasks.removeLast();
-            queueJob(j);
-        }
-        // todo: remove
-    }
-    private static int scheduleTask(Task t, int previous_index, int index) {
-        if(t instanceof Setup) {
-            t.setStartDate(((Job) t).getReleaseDate());
-            t.calculateFinishDate();
-            return index;
-        }
-        else if(((Job) t).makesDueDate(scheduledTasks.get(previous_index).getFinishDate())) {
-            t.setStartDate(((Job) t).getReleaseDate());
-            t.calculateFinishDate();
-            return index;
-        }
-        else {
-            // todo
-            return previous_index;
         }
     }
 
@@ -465,7 +483,7 @@ public class main {
             }
         }
         for (Task t : toRemove) {
-            if (t instanceof Job j) operation_deleteJobWithObject(j);
+            if (t instanceof Job j) operation_deleteJobUsingObject(j);
             else if (t instanceof Setup s) operation_deleteSetupWithObject(s);
             else throw new IllegalStateException("Class klopt niet");
         }
@@ -481,7 +499,7 @@ public class main {
             else toRemove.add(task);
         }
         for (Task t : toRemove) {
-            if (t instanceof Job j) operation_deleteJobWithObject(j);
+            if (t instanceof Job j) operation_deleteJobUsingObject(j);
             else if (t instanceof Setup s) operation_deleteSetupWithObject(s);
             else throw new IllegalStateException("Class is not right");
         }
@@ -523,6 +541,7 @@ public class main {
         return oldDuration >= newDuration;
     }
     /*********************************** LOCAL SEARCH ***********************************/
+
 
 
     /*********************************** PRINTS ***********************************/
@@ -650,7 +669,15 @@ public class main {
         }
         return clone;
     }
-}
+    private static void cleanUpSchedule(List<Task> toRemove) {
+        for(Task t : toRemove) {
+            scheduledTasks.remove(t);
+            if(t instanceof Job) {
+                queueJob((Job) t);
+            }
+        }
+    }
     /*********************************** UTIL ***********************************/
+}
 
 
