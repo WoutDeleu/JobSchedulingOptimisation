@@ -401,6 +401,7 @@ public class main {
          while(i<100) {
              LinkedList<Task> old_Scheduling = deepClone(scheduledTasks);
              LinkedList<Job> old_Waiting = deepCloneJobs(waitingJobs);
+             printScheduledTasks();
              executeRandomBasicOperation();
              assert isOrderCorrect() : "Order is fucked up";
 //            if(i%x==0){
@@ -461,7 +462,11 @@ public class main {
     }
     public static int randomJobIndex() {
         Random rand = new Random();
-        int jobIndex = rand.nextInt((scheduledTasks.size()+1)/2)*2;
+        int jobIndex = rand.nextInt(scheduledTasks.size());
+        if (!(scheduledTasks.get(jobIndex) instanceof Job)) {
+            if(jobIndex==scheduledTasks.size()-1) jobIndex--;
+            else jobIndex++;
+        }
         assert jobIndex%2==0 : "Job index not even";
         return jobIndex;
     }
