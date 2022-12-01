@@ -11,7 +11,5 @@ K
 datasets/eigen_dataset.json,5\8\58c50efb072670f6a94c278ff99f81bb0430c1ef
 7
 pom.xml,4\4\442292b8a7efeabbe4cc176709b833b1792140ec
-T
-$calculatedSolution/sol_A-100-30.json,b\7\b762550fc356615c76560763eecec344826921ac
 U
 %src/test/java/basicFunctionsTest.java,8\7\874fddfa68f200341939dd4b7c60037ea603a4f6

@@ -123,7 +123,7 @@ public class main {
         // Correct for 2 matching indexes
         if (i1 == i2) {
             if (i1==0) {
-                if (scheduledTasks.size()>1) i2 += 1;
+                if (jobsToShuffle.size()>1) i2 += 1;
                 else return; // No swap possible of only one job in scheduledTasks
             }
             else i1 -= 1;
