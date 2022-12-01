@@ -44,6 +44,9 @@ public class main {
 
         // Local search
         localSearch();
+        /*calculateCostSeperate();
+        System.out.println(calculateCost());
+        System.out.println(currentBestValue);*/
 
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
@@ -86,7 +89,9 @@ public class main {
     public static void executeRandomBasicOperation() {
         Random rand = new Random();
         int jobIndex = rand.nextInt(jobsToShuffle.size());
-        switch (rand.nextInt(3)) {
+        int option = rand.nextInt(4);
+        if(calculateRejectionCost()>2*calculateDurationCost()) option = 2;
+        switch (option) {
             case 0: if (jobsToShuffle.size()>10) //todo betere logica
                 operation_deleteJob(jobIndex);
                 break;
@@ -97,6 +102,9 @@ public class main {
                     operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
                 }
                 break;
+            case 3:
+                int jobindex2 = rand.nextInt(jobsToShuffle.size());
+                TwoOptSwap(jobIndex, jobindex2);
         }
     }
     /*********************************** LOCAL SEARCH ***********************************/
@@ -142,6 +150,55 @@ public class main {
         operation_insertJob(index2, job1);
     }
     /*********************************** BASIC OPERATIONS ***********************************/
+
+
+    /*********************************** ADVANCED OPERATIONS ***********************************/
+    public static void TwoOptSwap(int index1, int index2) {
+        LinkedList<Job> temp = new LinkedList<>();
+    /*if (index1 == index2) {
+        if (index1==0) {
+            if (jobsToShuffle.size()>1) index2 += 1;
+            else return; // No swap possible of only one job in scheduledTasks
+        }
+        else index1 -= 1;
+    }*/
+        int i1 = Math.min(index1, index2);
+        int i2 = Math.max(index1, index2);
+
+        while (i2-i1>10) {
+            i2-=1;
+            i1+=1;
+        }
+
+        System.out.println("i1: "+i1+", i2: "+i2);
+        int i;
+        for(i = 0; i < jobsToShuffle.size()-1; i++) {
+            System.out.print(i + ": " + jobsToShuffle.get(i) + " ->\t" );
+        }
+        System.out.println(i + ": " + jobsToShuffle.get(i));
+
+
+        //alle jobs van index 0 tot voor i1 in zelfde volgorde toevoegen
+        for (int a = 0; a < i1; a++) {
+            temp.add(jobsToShuffle.get(a));
+        }
+        //alle jobs tussen (inclusief) i1 en i2 in omgekeerde volgorde toevoegen aan nieuwe scheduling
+        for (int b = i2; b >= i1 ; b--) {
+            temp.add(jobsToShuffle.get(b));
+        }
+        //overige jobs van i2 tot jobsToShuffle opnieuw in zelfde volgorde toevoegen
+        for (int c = i2+1; c < jobsToShuffle.size(); c++) {
+            temp.add(jobsToShuffle.get(c));
+        }
+        jobsToShuffle = new LinkedList<>(temp);
+    /*int j;
+    for(j = 0; j < jobsToShuffle.size()-1; j++) {
+        System.out.print(j + ": " + jobsToShuffle.get(j) + " ->\t" );
+    }
+    System.out.println(j + ": " + jobsToShuffle.get(j));*/
+    }
+
+    /*********************************** ADVANCED OPERATIONS ***********************************/
 
 
     /*********************************** MAKE FEASIBLE ***********************************/
@@ -242,6 +299,43 @@ public class main {
         if (!scheduledTasks.isEmpty()) // add total schedule duration
             cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
         return (double) Math.round(cost * 100) / 100;
+    }
+    public static double calculateRejectionCost() {
+        double cost = 0;
+        for(Job j : allJobs) {
+            if(j.getStartDate()<0) {
+                cost+=j.getCost();
+                /*if(!waitingJobs.contains(j)) {
+                    System.out.println("Job "+j.getId()+"niet in waitinglist maar ook niet gescheduled, startTime=-1");
+                }*/
+            }
+        }
+        return cost;
+    }
+    public static double calculateEarlinessCost() {
+        double cost = 0;
+        for(Job j : allJobs) {
+            if(j.getStartDate()>=0) {
+                cost+=j.getCost();
+                /*if(!scheduledTasks.contains(j)) {
+                    System.out.println("Job "+j.getId()+"niet gescheduled maar ook niet in waiting list, startTime>0");
+                }*/
+            }
+        }
+        return cost;
+    }
+    public static double calculateDurationCost() {
+        double cost = 0;
+        if (!scheduledTasks.isEmpty()) // add total schedule duration
+            cost = (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+        return (double) Math.round(cost * 100) / 100;
+    }
+    public static double calculateCostSeperate(){
+        double rej = calculateRejectionCost();
+        double earliness = calculateEarlinessCost();
+        double dur = calculateDurationCost();
+        System.out.println(rej+earliness+dur+" (rejection: "+rej+" + earliness: "+earliness+" + duration: "+dur+")");
+        return rej+earliness+dur;
     }
     public static LinkedList<Task> deepClone(LinkedList<Task> tasks) {
         LinkedList<Task> clone = new LinkedList<>();
