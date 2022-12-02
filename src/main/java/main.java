@@ -19,7 +19,6 @@ public class main {
 
     // Optimal result
     private static LinkedList<Task> bestSchedule = new LinkedList<>();
-    private static double currentBestValue;
 
     // Parameters
     // Number of basic operations before we generate a feasible solution and calculate the associated cost
@@ -29,7 +28,7 @@ public class main {
 
     public static void main(String[] args) {
         // Reading inputs
-        InputData inputData = InputData.readFile("datasets/A-100-30.json");
+        InputData inputData = InputData.readFile("datasets/B-400-90.json");
         setups = inputData.generateSetupList();
         allJobs = inputData.getJobsSortedReleaseDate();
         unavailablePeriods = inputData.getUnavailablePeriods();
@@ -40,16 +39,16 @@ public class main {
         scheduledTasks = new LinkedList<>();
         jobsToShuffle = new LinkedList<>(allJobs);
         makeFeasibleSolution();
-        currentBestValue = calculateCost();
+        currentValue = calculateCost();
 
         // Local search
         localSearch();
-        /*calculateCostSeperate();
+        /*calculateCostSeparate();
         System.out.println(calculateCost());
         System.out.println(currentBestValue);*/
 
         // Write to JSON-file
-        OutputData outputData = InputData.generateOutput(inputData.getName(), currentBestValue, scheduledTasks);
+        OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
         InputData.writeFile("calculatedSolution/sol_" + inputData.getName()+".json", outputData);
     }
 
@@ -59,30 +58,33 @@ public class main {
         int iterationCount = 0;
         LinkedList<Task> oldScheduling;
         LinkedList<Job> oldWaitingJobs;
+        LinkedList<Job> oldJobsToShuffle;
 
         while (iterationCount<10000) {
             // Save the current situation
             oldScheduling = deepClone(scheduledTasks);
             oldWaitingJobs = deepCloneJobs(waitingJobs);
+            oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
             // Do some operations and make the result feasible
             executeRandomBasicOperation();
             makeFeasibleSolution();
 
-            double tempCost = calculateCost();
-
             // Replace the current solution if the new solution scores better
             // Else reset the old solution
             if (iterationCount%NR_OF_ITERATIONS_BEFORE_CALCULATE == 0) {
-                if (currentBestValue > tempCost) {
-                    currentBestValue = tempCost;
+                double tempCost = calculateCost();
+                if (tempCost < currentValue) {
+                    currentValue = tempCost;
                 } else {
                     scheduledTasks = oldScheduling;
                     waitingJobs = oldWaitingJobs;
+                    jobsToShuffle = oldJobsToShuffle;
                 }
             }
 
-            printScheduledTasks("local search, cost="+currentBestValue);
+            printScheduledTasks("local search, cost="+currentValue);
+            System.out.println("waiting: "+waitingJobs);
             iterationCount++;
         }
     }
@@ -293,13 +295,31 @@ public class main {
 
 
     /*********************************** ASSISTING FUNCTIONS ***********************************/
+//    public static double calculateCost() {
+//        double cost = 0;
+//        for (Job job : allJobs) cost += job.getCost();
+//        if (!scheduledTasks.isEmpty()) // add total schedule duration
+//            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+//        return (double) Math.round(cost * 100) / 100;
+//    }
     public static double calculateCost() {
-        double cost = 0;
-        for (Job job : allJobs) cost += job.getCost();
+        double earliness = 0;
+        for (Task task : scheduledTasks)
+            if (task instanceof Job job)
+                earliness += job.getScheduledCost();
+        System.out.println("earliness: "+earliness);
+        double rejection = 0;
+        for (Job job : waitingJobs)
+            rejection += job.getWaitingCost();
+        System.out.println("rejection: "+rejection);
+        double duration = 0;
         if (!scheduledTasks.isEmpty()) // add total schedule duration
-            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
-        return (double) Math.round(cost * 100) / 100;
+            duration = (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
+        System.out.println("duration: "+duration);
+        return (double) Math.round((earliness+rejection+duration) * 100) / 100;
     }
+
+
     public static double calculateRejectionCost() {
         double cost = 0;
         for(Job j : allJobs) {
@@ -330,7 +350,7 @@ public class main {
             cost = (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
         return (double) Math.round(cost * 100) / 100;
     }
-    public static double calculateCostSeperate(){
+    public static double calculateCostSeparate(){
         double rej = calculateRejectionCost();
         double earliness = calculateEarlinessCost();
         double dur = calculateDurationCost();

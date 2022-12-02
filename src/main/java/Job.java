@@ -87,6 +87,14 @@ public class Job extends Task{
         else return earlinessPenalty*(dueDate - finishDate);
     }
 
+    public double getScheduledCost() {
+        return earlinessPenalty*(dueDate - finishDate);
+    }
+
+    public double getWaitingCost() {
+        return rejectionPenalty;
+    }
+
     public void setJobSkipped() {
         finishDate = -1;
         startDate = -1;
