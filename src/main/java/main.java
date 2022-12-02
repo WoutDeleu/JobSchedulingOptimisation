@@ -23,7 +23,12 @@ public class main {
     // Parameters
     private static final int NR_OF_ITERATIONS_BEFORE_CALCULATE = 1; // Getest: beter bij kleine waarde
     private static int NR_OF_INITIAL_PLANNED;
-
+    private static final int NR_ITERATIONS_BEFORE_ACCEPT = 15;//TODO: nog wat zoeken naar ideale waarden,
+    // voor A-100_30 meer iteraties en kleinere marge is beter
+    // voor B-400-90 grotere marge is beter
+    //zeer sterk afhankelijk van random die operatie keist imo
+    //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
+    private static final double MARGIN = 1.001;
 
 
     public static void main(String[] args) {
@@ -66,6 +71,7 @@ public class main {
         long timeStart = System.currentTimeMillis();
         long timeNow = timeStart;
 
+
         LinkedList<Task> oldScheduling;
         LinkedList<Job> oldWaitingJobs;
         LinkedList<Job> oldJobsToShuffle;
@@ -88,8 +94,14 @@ public class main {
             // Else reset the old solution
             double tempCost = calculateCost(false);
             if (tempCost < currentValue) {
+                iterationCount = 0;
                 long time = (timeNow-timeStart)/1000;
                 System.out.println("Verbetering gevonden! Cost: "+tempCost+", na "+time+" seconden");
+                currentValue = tempCost;
+            } else if(iterationCount > NR_ITERATIONS_BEFORE_ACCEPT && tempCost<MARGIN*currentValue && timeNow/1000 <((timeStart+totalTime)/1000)-2) {
+                iterationCount = 0;
+                long time = (timeNow-timeStart)/1000;
+                System.out.println("slechtere opl geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
                 currentValue = tempCost;
             } else {
                 scheduledTasks = oldScheduling;
@@ -105,11 +117,13 @@ public class main {
     }
     public static void executeRandomIntelligentOperation() {
         Random rand = new Random();
-        int option = rand.nextInt(3);
+        int option = rand.nextInt(5);
         switch (option) {
-            case 0: smartDelete(); break;
-            case 1: localSwap(); break;
-            case 2: smartInsert(); break;
+            case 0 -> smartDelete();
+            case 1 -> localSwap();
+            case 2 -> smartInsert();
+            case 3 -> moveJob();
+            case 4 -> removeJobHighestRejectionPenalty();
         }
     }
     public static void executeRandomBasicOperation() {
@@ -202,7 +216,24 @@ public class main {
             operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
         }
     }
-
+    public static void moveJob() {
+        int i  = getRandomScheduledJobIndex();
+        if(i != -1) {
+            Job j = jobsToShuffle.get(i);
+            int t = j.getStartDate();
+            int index = i+1;
+            while (t < j.getDueDate()) {
+                t += jobsToShuffle.get(index).getDuration();
+                if(index<jobsToShuffle.size()-1) index++;
+                else t = j.getDueDate();
+            }
+            operation_deleteJob(i);
+            operation_insertJob(index, j);
+        }
+    }
+    public static void removeJobHighestRejectionPenalty(){
+        operation_deleteJob(highestEarlinessPenalty());
+    }
     public static void TwoOptSwap(int index1, int index2) {
         LinkedList<Job> temp = new LinkedList<>();
     /*if (index1 == index2) {
@@ -247,7 +278,6 @@ public class main {
     }
     System.out.println(j + ": " + jobsToShuffle.get(j));*/
     }
-
     /*********************************** ADVANCED OPERATIONS ***********************************/
 
 
@@ -368,8 +398,6 @@ public class main {
         }
         return (double) Math.round((earliness+rejection+duration) * 100) / 100;
     }
-
-
     public static double calculateRejectionCost() {
         double cost = 0;
         for(Job j : allJobs) {
@@ -416,6 +444,32 @@ public class main {
         LinkedList<Job> clone = new LinkedList<>();
         for(Job job : jobs) clone.add(job.clone());
         return clone;
+    }
+    public static int getRandomScheduledJobIndex() {
+        Random r = new Random();
+        int jobIndex = r.nextInt(jobsToShuffle.size()-1);
+        int i = jobIndex;
+        while (i<jobsToShuffle.size()-1) {
+            if(scheduledTasks.contains(jobsToShuffle.get(i))) return i;
+            i++;
+        }
+        i = 0;
+        while (i < jobIndex) {
+            if(scheduledTasks.contains(jobsToShuffle.get(i))) return i;
+            i++;
+        }
+        return -1;
+    }
+    public static int highestEarlinessPenalty() {
+        double cost = 0;
+        int i = -1;
+        for(Job j : allJobs) {
+            if(j.getStartDate()>=0 && j.getCost()>cost) {
+                cost=j.getCost();
+                i = allJobs.indexOf(j);
+            }
+        }
+        return i;
     }
     /*********************************** ASSISTING FUNCTIONS ***********************************/
 
