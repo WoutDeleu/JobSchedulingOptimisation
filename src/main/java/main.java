@@ -21,14 +21,14 @@ public class main {
     private static LinkedList<Task> bestSchedule = new LinkedList<>();
 
     // Parameters
-    // Number of basic operations before we generate a feasible solution and calculate the associated cost
-    private static final int NR_OF_ITERATIONS_BEFORE_CALCULATE = 1; //
+    private static final int NR_OF_ITERATIONS_BEFORE_CALCULATE = 1; // Getest: beter bij kleine waarde
+    private static int NR_OF_INITIAL_PLANNED;
 
 
 
     public static void main(String[] args) {
         // Reading inputs
-        InputData inputData = InputData.readFile("datasets/B-400-90.json");
+        InputData inputData = InputData.readFile("datasets/A-100-30.json");
         setups = inputData.generateSetupList();
         allJobs = inputData.getJobsSortedReleaseDate();
         unavailablePeriods = inputData.getUnavailablePeriods();
@@ -39,13 +39,18 @@ public class main {
         scheduledTasks = new LinkedList<>();
         jobsToShuffle = new LinkedList<>(allJobs);
         makeFeasibleSolution();
-        currentValue = calculateCost();
+        currentValue = calculateCost(false);
+
+        // Get some reference values
+        NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
 
         // Local search
         localSearch();
         /*calculateCostSeparate();
         System.out.println(calculateCost());
         System.out.println(currentBestValue);*/
+
+        printScheduledTasks("local search, cost="+currentValue);
 
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
@@ -56,36 +61,55 @@ public class main {
     /*********************************** LOCAL SEARCH ***********************************/
     public static void localSearch() {
         int iterationCount = 0;
+//        long totalTime = 1000*60*10; // 10 minuten
+        long totalTime = 1000*60;
+        long timeStart = System.currentTimeMillis();
+        long timeNow = timeStart;
+
         LinkedList<Task> oldScheduling;
         LinkedList<Job> oldWaitingJobs;
         LinkedList<Job> oldJobsToShuffle;
 
-        while (iterationCount<10000) {
+        while (timeNow<timeStart+totalTime) {
             // Save the current situation
             oldScheduling = deepClone(scheduledTasks);
             oldWaitingJobs = deepCloneJobs(waitingJobs);
             oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
             // Do some operations and make the result feasible
-            executeRandomBasicOperation();
+            for (int i = 0; i < NR_OF_ITERATIONS_BEFORE_CALCULATE; i++) {
+                executeRandomBasicOperation();
+                executeRandomIntelligentOperation();
+            }
+
             makeFeasibleSolution();
 
             // Replace the current solution if the new solution scores better
             // Else reset the old solution
-            if (iterationCount%NR_OF_ITERATIONS_BEFORE_CALCULATE == 0) {
-                double tempCost = calculateCost();
-                if (tempCost < currentValue) {
-                    currentValue = tempCost;
-                } else {
-                    scheduledTasks = oldScheduling;
-                    waitingJobs = oldWaitingJobs;
-                    jobsToShuffle = oldJobsToShuffle;
-                }
+            double tempCost = calculateCost(false);
+            if (tempCost < currentValue) {
+                long time = (timeNow-timeStart)/1000;
+                System.out.println("Verbetering gevonden! Cost: "+tempCost+", na "+time+" seconden");
+                currentValue = tempCost;
+            } else {
+                scheduledTasks = oldScheduling;
+                waitingJobs = oldWaitingJobs;
+                jobsToShuffle = oldJobsToShuffle;
             }
 
-            printScheduledTasks("local search, cost="+currentValue);
-            System.out.println("waiting: "+waitingJobs);
+
+//            printScheduledTasks("local search, cost="+currentValue);
+            timeNow = System.currentTimeMillis();
             iterationCount++;
+        }
+    }
+    public static void executeRandomIntelligentOperation() {
+        Random rand = new Random();
+        int option = rand.nextInt(3);
+        switch (option) {
+            case 0: smartDelete(); break;
+            case 1: localSwap(); break;
+            case 2: smartInsert(); break;
         }
     }
     public static void executeRandomBasicOperation() {
@@ -104,9 +128,9 @@ public class main {
                     operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
                 }
                 break;
-            case 3:
-                int jobindex2 = rand.nextInt(jobsToShuffle.size());
-                TwoOptSwap(jobIndex, jobindex2);
+            case 3: // Iets beter als we het niet gebruiken
+//                int jobIndex2 = rand.nextInt(jobsToShuffle.size());
+//                TwoOptSwap(jobIndex, jobIndex2);
         }
     }
     /*********************************** LOCAL SEARCH ***********************************/
@@ -155,6 +179,30 @@ public class main {
 
 
     /*********************************** ADVANCED OPERATIONS ***********************************/
+    public static void smartDelete() {
+        Random rand = new Random();
+        int jobIndex = rand.nextInt(jobsToShuffle.size());
+        if (jobsToShuffle.size() > 0.2*NR_OF_INITIAL_PLANNED) {
+            operation_deleteJob(jobIndex);
+        }
+    }
+    public static void localSwap() {
+        Random rand = new Random();
+        int index1 = rand.nextInt(jobsToShuffle.size());
+        int index2;
+        if (index1==0) index2=1;
+        else index2 = index1-1;
+        operation_swapJobs(index1,index2);
+    }
+    public static void smartInsert() {
+        Random rand = new Random();
+        int jobIndex = rand.nextInt(jobsToShuffle.size());
+        if (!waitingJobs.isEmpty()) {
+            int waitingIndex = rand.nextInt(waitingJobs.size());
+            operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
+        }
+    }
+
     public static void TwoOptSwap(int index1, int index2) {
         LinkedList<Job> temp = new LinkedList<>();
     /*if (index1 == index2) {
@@ -172,12 +220,12 @@ public class main {
             i1+=1;
         }
 
-        System.out.println("i1: "+i1+", i2: "+i2);
+//        System.out.println("i1: "+i1+", i2: "+i2);
         int i;
-        for(i = 0; i < jobsToShuffle.size()-1; i++) {
-            System.out.print(i + ": " + jobsToShuffle.get(i) + " ->\t" );
-        }
-        System.out.println(i + ": " + jobsToShuffle.get(i));
+//        for(i = 0; i < jobsToShuffle.size()-1; i++) {
+//            System.out.print(i + ": " + jobsToShuffle.get(i) + " ->\t" );
+//        }
+//        System.out.println(i + ": " + jobsToShuffle.get(i));
 
 
         //alle jobs van index 0 tot voor i1 in zelfde volgorde toevoegen
@@ -302,20 +350,22 @@ public class main {
 //            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
 //        return (double) Math.round(cost * 100) / 100;
 //    }
-    public static double calculateCost() {
+    public static double calculateCost(boolean print) {
         double earliness = 0;
         for (Task task : scheduledTasks)
             if (task instanceof Job job)
                 earliness += job.getScheduledCost();
-        System.out.println("earliness: "+earliness);
         double rejection = 0;
         for (Job job : waitingJobs)
             rejection += job.getWaitingCost();
-        System.out.println("rejection: "+rejection);
         double duration = 0;
         if (!scheduledTasks.isEmpty()) // add total schedule duration
             duration = (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
-        System.out.println("duration: "+duration);
+        if(print) {
+            System.out.println("earliness: "+earliness);
+            System.out.println("rejection: "+rejection);
+            System.out.println("duration: "+duration);
+        }
         return (double) Math.round((earliness+rejection+duration) * 100) / 100;
     }
 
