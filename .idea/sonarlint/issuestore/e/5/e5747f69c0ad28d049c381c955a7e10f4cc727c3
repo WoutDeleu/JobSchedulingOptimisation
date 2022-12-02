@@ -1,0 +1,6 @@
+
+rpython:S1192İ"TDefine a constant instead of duplicating this literal "Result: INPUT ERROR" 5 times.(áø‚‰ıÿÿÿÿ
+cpython:S1192Û"JDefine a constant instead of duplicating this literal "Errors: 1" 5 times.(§¿—Ö
+hpython:S1854ü"JRemove this assignment to local variable 'valid'; the value is never used.(ÃÎåËùÿÿÿÿ
+lpython:S3776Ê"TRefactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed.(–¼|
+Upython:S5754‹"<Specify an exception class to catch or reraise the exception(ˆÊÉ·

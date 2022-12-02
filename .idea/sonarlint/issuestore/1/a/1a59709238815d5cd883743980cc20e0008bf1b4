@@ -1,0 +1,136 @@
+
+¤
+java:S1186ç"€Add a nested comment explaining why this method is empty, throw an UnsupportedOperationException or complete the implementation.(•—£¶øÿÿÿÿ8şèÁÌ0
+Q	java:S125"<This block of commented-out lines of code should be removed.(•Š®ç
+h	java:S100O"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ƒˆ»ùıÿÿÿÿ
+d	java:S100ˆ"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¯ˆ´
+?
+java:S4274¡"(Replace this assert with a proper check.(äªØ
+i	java:S100™"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÍÌ±ûÿÿÿÿ
+O	java:S106"9Replace this use of System.out or System.err by a logger.(üıØæ
+i	java:S100·"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(›…ÉÃúÿÿÿÿ
+T	java:S106¼"9Replace this use of System.out or System.err by a logger.(à÷†üÿÿÿÿ
+D
+java:S4274Æ"(Replace this assert with a proper check.(ıˆÒ²úÿÿÿÿ
+d	java:S100À"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÛáÉ‰
+O	java:S106Ã"9Replace this use of System.out or System.err by a logger.(üıØæ
+d	java:S100Ö"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(şä‡–
+O	java:S106Û"9Replace this use of System.out or System.err by a logger.(‡€¬Ï
+d	java:S100Ş"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ºãÉ´
+W	java:S125ß"<This block of commented-out lines of code should be removed.(ÕÔ†ıÿÿÿÿ
+N
+java:S1135ä"2Complete the task associated to this TODO comment.(³Ò»şÿÿÿÿ
+O	java:S106æ"9Replace this use of System.out or System.err by a logger.(²‰„­
+?
+java:S4274ì"(Replace this assert with a proper check.(äªØ
+d	java:S100ë"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(§Œ§Û
+O	java:S106"9Replace this use of System.out or System.err by a logger.(¥º¤
+?
+java:S4274¥"(Replace this assert with a proper check.(¤£¨Ï
+i	java:S100™"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¸‰ß¨ÿÿÿÿÿ
+T	java:S106š"9Replace this use of System.out or System.err by a logger.(‰ŒÀııÿÿÿÿ
+i	java:S100¹"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(³ÛØòüÿÿÿÿ
+n
+java:S3776¹"RRefactor this method to reduce its Cognitive Complexity from 21 to the 15 allowed.(³ÛØòüÿÿÿÿ
+P
+java:S1854¾"9Remove this useless assignment to local variable "index".(Àªè
+A
+java:S1481¾"*Remove this unused "index" local variable.(Àªè
+p	java:S100ç"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(•—£¶øÿÿÿÿ8İşèÁÌ0
+d	java:S100ë"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Øè–°
+W
+java:S6201ô"@Replace this instanceof check and cast with 'instanceof Job job'(¾´ÔŞ
+i
+java:S1871€"MThis branch's code block is the same as the block for the branch on line 379.(Ãëæšûÿÿÿÿ
+W
+java:S1854š"@Remove this useless assignment to local variable "jobsToRemove".(ø“¸õ
+_
+java:S1854®"<Remove this useless assignment to local variable "tempCost".(ãéÔöøÿÿÿÿ8«ÏÇÁÌ0
+b
+java:S1854"?Remove this useless assignment to local variable "old_Waiting".(©øŒÚûÿÿÿÿ8«ÏÇÁÌ0
+`
+java:S1854œ"BRemove this useless assignment to local variable "old_Scheduling".(¹æ±§8¬ÏÇÁÌ0
+D
+java:S1172–"(Remove this unused method parameter "x".(ìÑËÆüÿÿÿÿ
+H
+java:S1481š"1Remove this unused "jobsToRemove" local variable.(ø“¸õ
+Q
+java:S1481œ"3Remove this unused "old_Scheduling" local variable.(¹æ±§8®ÏÇÁÌ0
+S
+java:S1481"0Remove this unused "old_Waiting" local variable.(©øŒÚûÿÿÿÿ8¯ÏÇÁÌ0
+W	java:S125 "<This block of commented-out lines of code should be removed.(¦ƒıõúÿÿÿÿ
+R	java:S125¤"<This block of commented-out lines of code should be removed.(°à‚ø
+I
+java:S1135£"2Complete the task associated to this TODO comment.(¶Ñ¢ß
+P
+java:S1481®"-Remove this unused "tempCost" local variable.(ãéÔöøÿÿÿÿ8°ÏÇÁÌ0
+Y	java:S125¯"<This block of commented-out lines of code should be removed.(¡ª¾×8±ÏÇÁÌ0
+W	java:S125¶"<This block of commented-out lines of code should be removed.(éØ»Úûÿÿÿÿ
+:
+java:S2119¾"Save and re-use this "Random".(šŸ«íøÿÿÿÿ
+g	java:S128À"LEnd this switch case with an unconditional break, return or throw statement.(£Ş¾Ëşÿÿÿÿ
+=	java:S131¿""Add a default case to this switch.(…­Ç£øÿÿÿÿ
+R	java:S125Ç"<This block of commented-out lines of code should be removed.(¯ß±
+Q	java:S125Ï"<This block of commented-out lines of code should be removed.(êüÅ
+R	java:S125Õ"<This block of commented-out lines of code should be removed.(–·É
+:
+java:S2119Ø"Save and re-use this "Random".(šŸ«íøÿÿÿÿ
+W	java:S125â"<This block of commented-out lines of code should be removed.(ó£ü•ıÿÿÿÿ
+O	java:S106Œ"9Replace this use of System.out or System.err by a logger.(„‘–£
+T	java:S106«"9Replace this use of System.out or System.err by a logger.(œÜ÷½ùÿÿÿÿ
+T	java:S106¯"9Replace this use of System.out or System.err by a logger.(½²ëóúÿÿÿÿ
+T	java:S106²"9Replace this use of System.out or System.err by a logger.(¬ÓÄ˜ûÿÿÿÿ
+O	java:S106´"9Replace this use of System.out or System.err by a logger.(ŒÿŞÓ
+R	java:S125¼"<This block of commented-out lines of code should be removed.(¤û¤û
+T	java:S106Â"9Replace this use of System.out or System.err by a logger.(šÒÇ‹şÿÿÿÿ
+T	java:S106Ì"9Replace this use of System.out or System.err by a logger.(ÂĞù—ıÿÿÿÿ
+N	java:S106Ö"9Replace this use of System.out or System.err by a logger.(¡çÑ
+T	java:S106à"9Replace this use of System.out or System.err by a logger.(íùŞşÿÿÿÿ
+T	java:S106ó"9Replace this use of System.out or System.err by a logger.(ù’»Êúÿÿÿÿ
+T	java:S106ı"9Replace this use of System.out or System.err by a logger.(Ûæ¿¡ÿÿÿÿÿ
+n
+java:S3776„"RRefactor this method to reduce its Cognitive Complexity from 30 to the 15 allowed.(…±öÂşÿÿÿÿ
+W
+java:S6201ˆ"@Replace this instanceof check and cast with 'instanceof Job job'(™–Œ‹
+O	java:S106ˆ"9Replace this use of System.out or System.err by a logger.(™–Œ‹
+T	java:S106‰"9Replace this use of System.out or System.err by a logger.(²ğ˜ÿÿÿÿÿ
+W
+java:S6201"@Replace this instanceof check and cast with 'instanceof Job job'(™–Œ‹
+O	java:S106"9Replace this use of System.out or System.err by a logger.(™–Œ‹
+T	java:S106"9Replace this use of System.out or System.err by a logger.(²ğ˜ÿÿÿÿÿ
+W
+java:S6201’"@Replace this instanceof check and cast with 'instanceof Job job'(™–Œ‹
+O	java:S106’"9Replace this use of System.out or System.err by a logger.(™–Œ‹
+T	java:S106“"9Replace this use of System.out or System.err by a logger.(²ğ˜ÿÿÿÿÿ
+\
+java:S6201¯"@Replace this instanceof check and cast with 'instanceof Job job'(Ô¥„ùÿÿÿÿ
+K
+java:S1068"0Remove this unused "bestSchedule" private field.(ô¹ñ ÿÿÿÿÿ
+u
+java:S2293»"YReplace the type specification in this constructor call with the diamond operator ("<>").(Óß„Íıÿÿÿÿ
+u
+java:S2293Ÿ"YReplace the type specification in this constructor call with the diamond operator ("<>").(š™ÅÄşÿÿÿÿ
+o
+java:S2293¦"YReplace the type specification in this constructor call with the diamond operator ("<>").(ÕÍ³/
+j
+java:S1192Ã"NDefine a constant instead of duplicating this literal "Original data" 4 times.(îÂûÃûÿÿÿÿ
+n
+java:S1192‰"RDefine a constant instead of duplicating this literal "Fault with Setup " 3 times.(²ğ˜ÿÿÿÿÿ
+g
+java:S1192ˆ"PDefine a constant instead of duplicating this literal "Fault with job " 3 times.(™–Œ‹
+ˆ
+java:S1319"qThe return type of this method should be an interface such as "List" rather than the implementation "LinkedList".(ªö×¡
+}
+java:S1319"fThe type of "tasks" should be an interface such as "List" rather than the implementation "LinkedList".(ªö×¡
+ˆ
+java:S1319¥"qThe return type of this method should be an interface such as "List" rather than the implementation "LinkedList".(íêıÚ
+|
+java:S1319¥"eThe type of "jobs" should be an interface such as "List" rather than the implementation "LinkedList".(íêıÚ
+l	java:S117¼"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ƒé¶¶ùÿÿÿÿ
+g	java:S117ë"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Øè–°
+s	java:S117ù"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Å™Ç¼úÿÿÿÿ8€âÒÅÌ0
+g	java:S117œ"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¹æ±§
+l	java:S117"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(©øŒÚûÿÿÿÿ
+b	java:S101"MRename this class name to match the regular expression '^[A-Z][a-zA-Z0-9]*$'.(²¶‚‰
+S
+java:S2589÷"7Remove this expression which always evaluates to "true"(™È°Áüÿÿÿÿ
