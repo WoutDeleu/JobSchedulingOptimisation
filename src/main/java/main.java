@@ -52,7 +52,7 @@ public class main {
             // Reading inputs
             InputData inputData = InputData.readFile("datasets/B-200-30.json");
             current_name = inputData.getName();
-            System.out.println(inputData.getName());
+            System.out.print(inputData.getName());
             setups = inputData.generateSetupList();
             allJobs = inputData.getJobsSortedReleaseDate();
             unavailablePeriods = inputData.getUnavailablePeriods();
@@ -74,8 +74,10 @@ public class main {
             System.out.println(" cost=" + currentValue);
 
             // Write to JSON-file
+/*
             OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
             InputData.writeFile("calculatedSolution/sol_" + inputData.getName() + ".json", outputData);
+*/
         }
     }
 
@@ -141,6 +143,7 @@ public class main {
             timeNow = System.currentTimeMillis();
             iterationCount++;
         }
+        System.out.println(" cost=" + currentValue);
         /**Time plot**/
         if(GRAPHICS) {
             try {
@@ -525,6 +528,9 @@ public class main {
     }
     /*********************************** PRINTS ***********************************/
 
+
+
+    /*********************************** Full solution ***********************************/
     public static void allsolutions() {
         // Reading inputs
         File[] datasets = InputData.getFiles("datasets");
@@ -572,6 +578,7 @@ public class main {
         toRemove.clear();
         bestSchedule.clear();
     }
+    /*********************************** Full solution ***********************************/
 
 }
 
