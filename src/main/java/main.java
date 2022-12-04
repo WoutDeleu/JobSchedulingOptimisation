@@ -1,3 +1,9 @@
+import com.github.sh0nk.matplotlib4j.Plot;
+import com.github.sh0nk.matplotlib4j.PythonExecutionException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -29,54 +35,66 @@ public class main {
     //zeer sterk afhankelijk van random die operatie keist imo
     //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
     private static final double MARGIN = 1.001;
-
+    private static boolean FULL_SOLUTION = true;
+    private static boolean GRAPHICS = true;
+    private static final long availableTime = 1000*60*10; // 10 min
+//    private static final long availableTime = 1000*60; // 1 min
+    private static String current_name = "";
 
     public static void main(String[] args) {
-        // Reading inputs
-        InputData inputData = InputData.readFile("datasets/A-100-30.json");
-        setups = inputData.generateSetupList();
-        allJobs = inputData.getJobsSortedReleaseDate();
-        unavailablePeriods = inputData.getUnavailablePeriods();
-        horizon = inputData.getHorizon();
-        weight = inputData.getWeightDuration();
+        if(FULL_SOLUTION) {
+            allsolutions();
+        }
+        // Calculate solutions for manually given datasets
+        else {
+            // Reading inputs
+            InputData inputData = InputData.readFile("datasets/B-200-30.json");
+            current_name = inputData.getName();
+            System.out.println(inputData.getName());
+            setups = inputData.generateSetupList();
+            allJobs = inputData.getJobsSortedReleaseDate();
+            unavailablePeriods = inputData.getUnavailablePeriods();
+            horizon = inputData.getHorizon();
+            weight = inputData.getWeightDuration();
 
-        // Initial solution
-        scheduledTasks = new LinkedList<>();
-        jobsToShuffle = new LinkedList<>(allJobs);
-        makeFeasibleSolution();
-        currentValue = calculateCost(false);
+            // Initial solution
+            scheduledTasks = new LinkedList<>();
+            jobsToShuffle = new LinkedList<>(allJobs);
+            makeFeasibleSolution();
+            currentValue = calculateCost(false);
 
-        // Get some reference values
-        NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
+            // Get some reference values
+            NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
 
-        // Local search
-        localSearch();
-        /*calculateCostSeparate();
-        System.out.println(calculateCost());
-        System.out.println(currentBestValue);*/
+            // Local search
+            localSearch();
 
-        printScheduledTasks("local search, cost="+currentValue);
+            System.out.println(" cost=" + currentValue);
 
-        // Write to JSON-file
-        OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
-        InputData.writeFile("calculatedSolution/sol_" + inputData.getName()+".json", outputData);
+            // Write to JSON-file
+            OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
+            InputData.writeFile("calculatedSolution/sol_" + inputData.getName() + ".json", outputData);
+        }
     }
 
 
     /*********************************** LOCAL SEARCH ***********************************/
     public static void localSearch() {
         int iterationCount = 0;
-//        long totalTime = 1000*60*10; // 10 minuten
-        long totalTime = 1000*60;
         long timeStart = System.currentTimeMillis();
         long timeNow = timeStart;
+
+        /**Time plot**/
+        ArrayList<Long> times = new ArrayList<>();
+        ArrayList<Long> values = new ArrayList<>();
+        /**Time plot**/
 
 
         LinkedList<Task> oldScheduling;
         LinkedList<Job> oldWaitingJobs;
         LinkedList<Job> oldJobsToShuffle;
 
-        while (timeNow<timeStart+totalTime) {
+        while (timeNow<timeStart+availableTime) {
             // Save the current situation
             oldScheduling = deepClone(scheduledTasks);
             oldWaitingJobs = deepCloneJobs(waitingJobs);
@@ -89,6 +107,13 @@ public class main {
             }
 
             makeFeasibleSolution();
+            if(GRAPHICS) {
+                /**Time plot**/
+                long currTime = System.currentTimeMillis() - timeStart;
+                times.add(currTime);
+                values.add((long) currentValue);
+                /**Time plot**/
+            }
 
             // Replace the current solution if the new solution scores better
             // Else reset the old solution
@@ -96,12 +121,12 @@ public class main {
             if (tempCost < currentValue) {
                 iterationCount = 0;
                 long time = (timeNow-timeStart)/1000;
-                System.out.println("Verbetering gevonden! Cost: "+tempCost+", na "+time+" seconden");
+//                System.out.println("Verbetering gevonden! Cost: "+tempCost+", na "+time+" seconden");
                 currentValue = tempCost;
-            } else if(iterationCount > NR_ITERATIONS_BEFORE_ACCEPT && tempCost<MARGIN*currentValue && timeNow/1000 <((timeStart+totalTime)/1000)-2) {
+            } else if(iterationCount > NR_ITERATIONS_BEFORE_ACCEPT && tempCost<MARGIN*currentValue && timeNow/1000 <((timeStart+availableTime)/1000)-2) {
                 iterationCount = 0;
                 long time = (timeNow-timeStart)/1000;
-                System.out.println("slechtere opl geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
+//                System.out.println("slechtere opl geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
                 currentValue = tempCost;
             } else {
                 scheduledTasks = oldScheduling;
@@ -114,6 +139,17 @@ public class main {
             timeNow = System.currentTimeMillis();
             iterationCount++;
         }
+        /**Time plot**/
+        if(GRAPHICS) {
+            try {
+                Plotter.plotTimes(times, values, current_name);
+            } catch (PythonExecutionException e) {
+                System.out.println(e);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+        }
+        /**Time plot**/
     }
     public static void executeRandomIntelligentOperation() {
         Random rand = new Random();
@@ -463,10 +499,10 @@ public class main {
     public static int highestEarlinessPenalty() {
         double cost = 0;
         int i = -1;
-        for(Job j : allJobs) {
+        for(Job j : jobsToShuffle) {
             if(j.getStartDate()>=0 && j.getCost()>cost) {
                 cost=j.getCost();
-                i = allJobs.indexOf(j);
+                i = jobsToShuffle.indexOf(j);
             }
         }
         return i;
@@ -491,5 +527,54 @@ public class main {
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
     /*********************************** PRINTS ***********************************/
+
+    public static void allsolutions() {
+        // Reading inputs
+        File[] datasets = InputData.getFiles("datasets");
+        for(File dataset : datasets) {
+            InputData inputData = InputData.readFile("datasets/" + dataset.getName());
+            System.out.print(inputData.getName());
+            current_name = inputData.getName();
+            setups = inputData.generateSetupList();
+            allJobs = inputData.getJobsSortedReleaseDate();
+            unavailablePeriods = inputData.getUnavailablePeriods();
+            horizon = inputData.getHorizon();
+            weight = inputData.getWeightDuration();
+
+            // Initial solution
+            scheduledTasks = new LinkedList<>();
+            jobsToShuffle = new LinkedList<>(allJobs);
+            makeFeasibleSolution();
+            currentValue = calculateCost(false);
+
+            // Get some reference values
+            NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
+
+            // Local search
+            localSearch();
+
+            /*calculateCostSeparate();
+            System.out.println(calculateCost());
+            System.out.println(currentBestValue);*/
+
+            System.out.println(" cost="+currentValue);
+
+            // Write to JSON-file
+            OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
+            InputData.writeFile("calculatedSolution/sol_" + inputData.getName()+".json", outputData);
+            reset();
+        }
+    }
+    private static void reset() {
+        allJobs.clear();
+        setups.clear();
+        unavailablePeriods.clear();
+        horizon = 0;
+        waitingJobs.clear();
+        jobsToShuffle.clear();
+        toRemove.clear();
+        bestSchedule.clear();
+    }
+
 }
 

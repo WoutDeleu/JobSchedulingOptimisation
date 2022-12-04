@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,6 +28,10 @@ public class InputData {
     private ArrayList<UnavailablePeriod> unavailablePeriods = new ArrayList<>();
     private ArrayList<int[]> setups = new ArrayList<>();
 
+    public static File[] getFiles(String directory) {
+       File dir = new File(directory);
+       return dir.listFiles();
+    }
 
     public static InputData readFile(String path) {
         InputData inputData = null;
@@ -68,6 +73,8 @@ public class InputData {
         return new Setup(duration, id1, id2);
     }
 
+    public String getName() {return name;}
+
     public List<Job> getJobsSortedReleaseDate() {
         // sort by release date
         jobs.sort(new JobComparator());
@@ -77,7 +84,6 @@ public class InputData {
     public double getWeightDuration() {
         return weightDuration;
     }
-    public String getName() {return name;}
 
     public List<UnavailablePeriod> getUnavailablePeriods() {
         return unavailablePeriods;

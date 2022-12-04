@@ -2,6 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SetupList {
+    public void clear() {
+        setups.clear();
+    }
     private ArrayList<int[]> setups = new ArrayList<>();
 
     public SetupList(ArrayList<int[]> setups) {
