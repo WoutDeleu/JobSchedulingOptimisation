@@ -35,11 +35,13 @@ public class main {
     //zeer sterk afhankelijk van random die operatie keist imo
     //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
     private static final double MARGIN = 1.001;
-    private static boolean FULL_SOLUTION = true;
+    private static boolean FULL_SOLUTION = false;
     private static boolean GRAPHICS = true;
     private static final long availableTime = 1000*60*10; // 10 min
 //    private static final long availableTime = 1000*60; // 1 min
     private static String current_name = "";
+
+    private static Random random = new Random();
 
     public static void main(String[] args) {
         if(FULL_SOLUTION) {
@@ -102,8 +104,8 @@ public class main {
 
             // Do some operations and make the result feasible
             for (int i = 0; i < NR_OF_ITERATIONS_BEFORE_CALCULATE; i++) {
-                executeRandomBasicOperation();
                 executeRandomIntelligentOperation();
+                executeRandomBasicOperation();
             }
 
             makeFeasibleSolution();
@@ -152,8 +154,7 @@ public class main {
         /**Time plot**/
     }
     public static void executeRandomIntelligentOperation() {
-        Random rand = new Random();
-        int option = rand.nextInt(5);
+        int option = random.nextInt(5);
         switch (option) {
             case 0 -> smartDelete();
             case 1 -> localSwap();
@@ -163,23 +164,22 @@ public class main {
         }
     }
     public static void executeRandomBasicOperation() {
-        Random rand = new Random();
-        int jobIndex = rand.nextInt(jobsToShuffle.size());
-        int option = rand.nextInt(4);
+        int jobIndex = random.nextInt(jobsToShuffle.size());
+        int option = random.nextInt(4);
         if(calculateRejectionCost()>2*calculateDurationCost()) option = 2;
         switch (option) {
             case 0: if (jobsToShuffle.size()>10) //todo betere logica
                 operation_deleteJob(jobIndex);
                 break;
-            case 1: operation_swapJobs(jobIndex, rand.nextInt(jobsToShuffle.size())); break;
+            case 1: operation_swapJobs(jobIndex, random.nextInt(jobsToShuffle.size())); break;
             case 2: // insert
                 if (!waitingJobs.isEmpty()) {
-                    int waitingIndex = rand.nextInt(waitingJobs.size());
+                    int waitingIndex = random.nextInt(waitingJobs.size());
                     operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
                 }
                 break;
             case 3: // Iets beter als we het niet gebruiken
-//                int jobIndex2 = rand.nextInt(jobsToShuffle.size());
+//                int jobIndex2 = random.nextInt(jobsToShuffle.size());
 //                TwoOptSwap(jobIndex, jobIndex2);
         }
     }
@@ -230,25 +230,22 @@ public class main {
 
     /*********************************** ADVANCED OPERATIONS ***********************************/
     public static void smartDelete() {
-        Random rand = new Random();
-        int jobIndex = rand.nextInt(jobsToShuffle.size());
+        int jobIndex = random.nextInt(jobsToShuffle.size());
         if (jobsToShuffle.size() > 0.2*NR_OF_INITIAL_PLANNED) {
             operation_deleteJob(jobIndex);
         }
     }
     public static void localSwap() {
-        Random rand = new Random();
-        int index1 = rand.nextInt(jobsToShuffle.size());
+        int index1 = random.nextInt(jobsToShuffle.size());
         int index2;
         if (index1==0) index2=1;
         else index2 = index1-1;
         operation_swapJobs(index1,index2);
     }
     public static void smartInsert() {
-        Random rand = new Random();
-        int jobIndex = rand.nextInt(jobsToShuffle.size());
+        int jobIndex = random.nextInt(jobsToShuffle.size());
         if (!waitingJobs.isEmpty()) {
-            int waitingIndex = rand.nextInt(waitingJobs.size());
+            int waitingIndex = random.nextInt(waitingJobs.size());
             operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
         }
     }
