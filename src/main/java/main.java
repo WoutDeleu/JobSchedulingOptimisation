@@ -35,7 +35,7 @@ public class main {
     private static boolean FULL_SOLUTION = false;
     private static boolean GRAPHICS = true;
 //    private static final long availableTime = 1000*60*10; // 10 min
-    private static final long availableTime = 1000*60; // 1 min
+    private static final long availableTime = 1000*60*5; // 1 min
     private static String current_name = "";
 
     private static Random random = new Random();
@@ -115,7 +115,7 @@ public class main {
             double r = random.nextDouble();
 
             // If all-time best, safe this solution
-            if (currentValue<bestValue) {
+            if (currentValue < bestValue) {
                 bestValue = currentValue;
                 bestSchedule = deepClone(scheduledTasks);
             }
@@ -141,7 +141,7 @@ public class main {
             }
 
             timeNow = System.currentTimeMillis();
-            T = 0.99*T;
+            T = 0.995*T;
         }
         System.out.println(" cost=" + currentValue);
 
