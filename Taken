@@ -1,8 +1,3 @@
-    // voor A-100_30 meer iteraties en kleinere marge is beter
-    // voor B-400-90 grotere marge is beter
-    //zeer sterk afhankelijk van random die operatie keist imo
-    //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
-
 
 1. Parameters + Dynamisch algoritme // todo Wout
     - Na bepaalde tijd andere functies meer uitvoeren
@@ -14,16 +9,13 @@
 2. makefeasible more forgiving (dus ietske langer loopen, maar beter resultaat) // todo Wout
 
 4. Ruin and recreate (ruin tussen twee UP' s?) // todo : Wout
+       => gewoon een bepaalde waarde instellen voor hoe een groot gebied we verwijderen
 
 4. k opt // todo : Wout
+5. smart insert // todo Wannes Vermeiren Zele
+7. Enkel cost + makeFeasible vanaf laatste wijziging herberekenen // todo Wannes
 
-7. Enkel cost + makefeasible vanaf laatste wijziging herberekenen // todo Wannes
-
-
-EXTRA:
-    - local search uitbreiden met annealing
 
 https://stackoverflow.com/questions/574594/how-can-i-create-an-executable-runnable-jar-with-dependencies-using-maven
-5. smart insert // todo Wannes Vermeiren Zele
 
-6. Make feasible omdraaien  // todo: Wout
+

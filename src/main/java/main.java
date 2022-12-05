@@ -3,16 +3,14 @@ import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class main {
     // Input data
     private static List<Job> allJobs;
     private static SetupList setups;
     private static List<UnavailablePeriod> unavailablePeriods;
+    private static List<UnavailablePeriod> inverseUnavailablePeriods;
     private static int horizon;
     private static double weight;
 
@@ -29,38 +27,40 @@ public class main {
 
 
     private static int NR_OF_INITIAL_PLANNED;
-    private static final int NR_ITERATIONS_BEFORE_ACCEPT = 15;//TODO: nog wat zoeken naar ideale waarden,
 
-    private static final double MARGIN = 1.001;
     private static boolean FULL_SOLUTION = false;
-    private static boolean GRAPHICS = true;
-//    private static final long availableTime = 1000*60*10; // 10 min
-    private static final long availableTime = 1000*60*5; // 1 min
+    private static boolean GRAPHICS = false;
+    //    private static final long availableTime = 1000*60*10; // 10 min
+    private static final long availableTime = 1000*60*1; // 1 min
     private static String current_name = "";
 
     private static Random random = new Random();
 
     public static void main(String[] args) {
-        if(FULL_SOLUTION) {allsolutions();}
+        if(FULL_SOLUTION) {allSolutions();}
         // Calculate solutions for manually given datasets
         else {
             // Reading inputs
             InputData inputData = InputData.readFile("datasets/A-100-30.json");
             current_name = inputData.getName();
-            System.out.print(inputData.getName());
             setups = inputData.generateSetupList();
             allJobs = inputData.getJobsSortedReleaseDate();
             unavailablePeriods = inputData.getUnavailablePeriods();
             horizon = inputData.getHorizon();
             weight = inputData.getWeightDuration();
+            inverseUnavailablePeriods = new LinkedList<>(unavailablePeriods);
+            Collections.reverse(inverseUnavailablePeriods);
+
 
             // Initial solution
             scheduledTasks = new LinkedList<>();
             jobsToShuffle = new LinkedList<>(allJobs);
+//            inverseMakeFeasibleSolution();
             makeFeasibleSolution();
             currentValue = calculateCost(false);
             bestValue = currentValue;
             bestSchedule = deepClone(scheduledTasks);
+            System.out.println("initial cost: "+bestValue);
 
             // Get some reference values
             NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
@@ -69,6 +69,7 @@ public class main {
             localSearch();
 
 //            printEarlinessPenaltiesPerJob();
+            printScheduledTasks();
 
             // Write to JSON-file
             OutputData outputData = InputData.generateOutput(inputData.getName(), bestValue, bestSchedule);
@@ -98,10 +99,11 @@ public class main {
             oldWaitingJobs = deepCloneJobs(waitingJobs);
             oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
-            executeRandomIntelligentOperation();
             executeRandomBasicOperation();
+            executeRandomIntelligentOperation();
 
-            makeFeasibleSolution();
+//            makeFeasibleSolution();
+            inverseMakeFeasibleSolution();
 
             if(GRAPHICS) {
                 long currTime = System.currentTimeMillis() - timeStart;
@@ -110,40 +112,44 @@ public class main {
             }
 
             double tempCost = calculateCost(false);
-            double deltaE = tempCost - currentValue;
-            double p = Math.exp(-deltaE/T);
-            double r = random.nextDouble();
 
-            // If all-time best, safe this solution
-            if (currentValue < bestValue) {
-                bestValue = currentValue;
-                bestSchedule = deepClone(scheduledTasks);
-            }
 
             // Accept better solution
             if (tempCost < currentValue) {
                 long time = (timeNow-timeStart)/1000;
-                System.out.println("Verbetering gevonden! Cost: "+tempCost+", na "+time+" seconden");
+                System.out.println("Verbetering gevonden!, Cost: "+tempCost+", na "+time+" seconden");
 
                 currentValue = tempCost;
+
+                // If all-time best, safe this solution
+                if (currentValue < bestValue) {
+                    bestValue = currentValue;
+                    bestSchedule = deepClone(scheduledTasks);
+                }
             }
-            // Accept worse solution in some cases
-            else if (p>r) {
-                currentValue = tempCost;
-                long time = (timeNow-timeStart)/1000;
-                System.out.println("Slechter geacepteerd! Cost: "+tempCost+", na "+time+" seconden");
-            }
-            // Reset old solution
             else {
-                scheduledTasks = oldScheduling;
-                waitingJobs = oldWaitingJobs;
-                jobsToShuffle = oldJobsToShuffle;
+                double deltaE = tempCost - currentValue;
+                double p = Math.exp(-deltaE / T);
+                double r = random.nextDouble();
+                // Accept worse solution in some cases
+                if (p > r) {
+                    currentValue = tempCost;
+                    long time = (timeNow - timeStart) / 1000;
+                    System.out.println("Slechter geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
+                }
+
+                // Reset old solution
+                else {
+                    scheduledTasks = oldScheduling;
+                    waitingJobs = oldWaitingJobs;
+                    jobsToShuffle = oldJobsToShuffle;
+//                    System.out.println("Slechter => gereset");
+                }
             }
 
             timeNow = System.currentTimeMillis();
             T = 0.995*T;
         }
-        System.out.println(" cost=" + currentValue);
 
         if(GRAPHICS) {
             try {Plotter.plotTimes(times, values, current_name);}
@@ -264,47 +270,19 @@ public class main {
     }
     public static void TwoOptSwap(int index1, int index2) {
         LinkedList<Job> temp = new LinkedList<>();
-    /*if (index1 == index2) {
-        if (index1==0) {
-            if (jobsToShuffle.size()>1) index2 += 1;
-            else return; // No swap possible of only one job in scheduledTasks
-        }
-        else index1 -= 1;
-    }*/
         int i1 = Math.min(index1, index2);
         int i2 = Math.max(index1, index2);
-
         while (i2-i1>10) {
             i2-=1;
             i1+=1;
         }
-
-//        System.out.println("i1: "+i1+", i2: "+i2);
-        int i;
-//        for(i = 0; i < jobsToShuffle.size()-1; i++) {
-//            System.out.print(i + ": " + jobsToShuffle.get(i) + " ->\t" );
-//        }
-//        System.out.println(i + ": " + jobsToShuffle.get(i));
-
-
         //alle jobs van index 0 tot voor i1 in zelfde volgorde toevoegen
-        for (int a = 0; a < i1; a++) {
-            temp.add(jobsToShuffle.get(a));
-        }
+        for (int a = 0; a < i1; a++) temp.add(jobsToShuffle.get(a));
         //alle jobs tussen (inclusief) i1 en i2 in omgekeerde volgorde toevoegen aan nieuwe scheduling
-        for (int b = i2; b >= i1 ; b--) {
-            temp.add(jobsToShuffle.get(b));
-        }
+        for (int b = i2; b >= i1 ; b--) temp.add(jobsToShuffle.get(b));
         //overige jobs van i2 tot jobsToShuffle opnieuw in zelfde volgorde toevoegen
-        for (int c = i2+1; c < jobsToShuffle.size(); c++) {
-            temp.add(jobsToShuffle.get(c));
-        }
+        for (int c = i2+1; c < jobsToShuffle.size(); c++) temp.add(jobsToShuffle.get(c));
         jobsToShuffle = new LinkedList<>(temp);
-    /*int j;
-    for(j = 0; j < jobsToShuffle.size()-1; j++) {
-        System.out.print(j + ": " + jobsToShuffle.get(j) + " ->\t" );
-    }
-    System.out.println(j + ": " + jobsToShuffle.get(j));*/
     }
     /*********************************** ADVANCED OPERATIONS ***********************************/
 
@@ -360,6 +338,7 @@ public class main {
             scheduledTasks.removeLast();
             scheduledTasks.removeLast();
             queueJob(lastJob);
+            lastJob = (Job) scheduledTasks.getLast();
         }
     }
     private static void queueJob(Job job) {
@@ -398,6 +377,93 @@ public class main {
         }
     }
     /*********************************** MAKE FEASIBLE ***********************************/
+
+
+    /*********************************** INVERSE FEASIBLE ***********************************/
+    public static void inverseMakeFeasibleSolution() {
+        scheduledTasks.clear();
+        Collections.reverse(jobsToShuffle);
+
+        boolean zeroReached = false;
+
+        for(Job job : jobsToShuffle) {
+            if(!zeroReached) {
+                inverseScheduleJob(job);
+                if (job.getStartDate()<0) {
+                    inverseTrim();
+                    zeroReached=true;
+                }
+            }
+            else{queueJob(job);}
+        }
+        for (Job job : toRemove) jobsToShuffle.remove(job);
+        Collections.reverse(jobsToShuffle);
+    }
+    public static void inverseScheduleJob(Job job) {
+        // No setup after last job
+        if (scheduledTasks.isEmpty()) {
+            int startDate = job.getLatestStartDate();
+            startDate = inverseCalculateFittingStartTimeUPs(startDate, job);
+
+            inversePlanAndPlaceJob(job, startDate);
+        }
+        // All others require a setup
+        else {
+            Task previous = scheduledTasks.getFirst();
+            assert previous instanceof Job : "Eerste item is geen job";
+
+            // Schedule setup
+            Setup setup = setups.getSetup(job, (Job) previous);
+            int startDateSetup = previous.startDate-setup.getDuration();
+            startDateSetup = inverseCalculateFittingStartTimeUPs(startDateSetup, setup);
+
+            // Schedule job
+            int startDateJob = Math.min(job.getLatestStartDate(), startDateSetup-job.getDuration()-1);
+            startDateJob = inverseCalculateFittingStartTimeUPs(startDateJob, job);
+
+            inversePlanAndPlaceJobWithSetup(setup, startDateSetup, job, startDateJob);
+        }
+
+    }
+    public static void inverseTrim() {
+        Job firstJob = (Job) scheduledTasks.getFirst();
+        while (firstJob.getStartDate()<0) {
+            if (scheduledTasks.size()>1) scheduledTasks.removeFirst();
+            scheduledTasks.removeFirst();
+            queueJob(firstJob);
+            firstJob = (Job) scheduledTasks.getFirst();
+        }
+    }
+    private static int inverseCalculateFittingStartTimeUPs(int startDate, Task task) {
+        for (UnavailablePeriod up : inverseUnavailablePeriods) {
+            if (startDate > up.getFinishDate()) break;
+            else startDate = Math.min(up.getStartDate()-task.getDuration(), startDate);
+        }
+        return startDate;
+    }
+    public static void inversePlanAndPlaceJob(Job job, int startDate) {
+        if(job.makesReleaseDate(startDate) && job.makesHorizon(startDate, horizon)) {
+            job.setStartDate(startDate);
+            job.calculateFinishDate();
+            scheduledTasks.add(0, job);
+        }
+        else {queueJob(job);}
+    }
+    private static void inversePlanAndPlaceJobWithSetup(Setup setup, int startingDateSetup, Job job, int startingDateJob) {
+        if (job.makesReleaseDate(startingDateJob)) {
+            setup.setStartDate(startingDateSetup);
+            setup.calculateFinishDate();
+            scheduledTasks.add(0, setup);
+
+            job.setStartDate(startingDateJob);
+            job.calculateFinishDate();
+            scheduledTasks.add(0, job);
+        }
+        else {
+            queueJob(job);
+        }
+    }
+    /*********************************** INVERSE FEASIBLE ***********************************/
 
 
     /*********************************** ASSISTING FUNCTIONS ***********************************/
@@ -518,13 +584,23 @@ public class main {
         }
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
+    public static void printEarlinessPenaltiesPerJob() {
+        int i;
+        for(i = 0; i < scheduledTasks.size()-1; i++) {
+            if (scheduledTasks.get(i) instanceof Job j) {
+                System.out.print(i + ": (earlinessPenalty = "+j.getScheduledCost()+") ->\t");
+            }
+        }
+        if (scheduledTasks.get(i) instanceof Job j) {
+            System.out.print(i + ": (earlinessPenalty = "+j.getScheduledCost()+")");
+        }
+    }
     /*********************************** PRINTS ***********************************/
 
 
-
     /*********************************** Full solution ***********************************/
-    public static void allsolutions() {
-        // Reading inputs
+    public static void allSolutions() {
+        // Reading input
         File[] datasets = InputData.getFiles("datasets");
         for(File dataset : datasets) {
             InputData inputData = InputData.readFile("datasets/" + dataset.getName());

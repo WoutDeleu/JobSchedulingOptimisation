@@ -78,8 +78,21 @@ public class Job extends Task{
         return new Job(this.startDate, this.finishDate, this.id, this.duration, this.releaseDate, this.dueDate, this.earlinessPenalty, this.rejectionPenalty);
     }
 
+    public int getLatestStartDate() {
+        return dueDate - duration;
+    }
+
     public boolean makesDueDate(int startingTime) {
         return startingTime + duration <= dueDate;
+    }
+
+    public boolean makesReleaseDate(int startingTime) {
+        return startingTime >= releaseDate;
+    }
+
+    public boolean makesHorizon(int startingTime, int horizon) {
+        int finishDate = startingTime+duration-1;
+        return finishDate <= horizon;
     }
 
     public double getCost() {
