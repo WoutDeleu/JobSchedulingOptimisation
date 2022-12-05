@@ -68,7 +68,7 @@ public class main {
             // Local search
             localSearch();
 
-//            printEarlinessPenaltiesPerJob();
+            printEarlinessPenaltiesPerJob();
 
             // Write to JSON-file
             OutputData outputData = InputData.generateOutput(inputData.getName(), bestValue, bestSchedule);
@@ -589,6 +589,17 @@ public class main {
             int jobNr = random.nextInt(removed.size());
             jobsToShuffle.add(i, removed.get(jobNr));
             removed.remove(jobNr);
+        }
+    }
+    public static void printEarlinessPenaltiesPerJob() {
+        int i;
+        for(i = 0; i < scheduledTasks.size()-1; i++) {
+            if (scheduledTasks.get(i) instanceof Job j) {
+                System.out.print(i + ": (earlinessPenalty = "+j.getScheduledCost()+") ->\t");
+            }
+        }
+        if (scheduledTasks.get(i) instanceof Job j) {
+            System.out.print(i + ": (earlinessPenalty = "+j.getScheduledCost()+")");
         }
     }
 
