@@ -25,9 +25,6 @@ public class main {
 
     // Optimal result
     private static LinkedList<Task> bestSchedule = new LinkedList<>();
-
-    // Parameters
-    private static final int NR_OF_ITERATIONS_BEFORE_CALCULATE = 1; // Getest: beter bij kleine waarde
     private static int NR_OF_INITIAL_PLANNED;
     private static final int NR_ITERATIONS_BEFORE_ACCEPT = 15;//TODO: nog wat zoeken naar ideale waarden,
     // voor A-100_30 meer iteraties en kleinere marge is beter
@@ -41,7 +38,7 @@ public class main {
     private static final long availableTime = 1000*60; // 1 min
     private static String current_name = "";
 
-    private static Random random = new Random();
+    private static Random random = new Random(3);
 
     public static void main(String[] args) {
         if(FULL_SOLUTION) {
@@ -104,11 +101,9 @@ public class main {
             oldWaitingJobs = deepCloneJobs(waitingJobs);
             oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
-            // Do some operations and make the result feasible
-            for (int i = 0; i < NR_OF_ITERATIONS_BEFORE_CALCULATE; i++) {
-                executeRandomIntelligentOperation();
-                executeRandomBasicOperation();
-            }
+            executeRandomIntelligentOperation();
+            executeRandomBasicOperation();
+
 
             makeFeasibleSolution();
             if(GRAPHICS) {
