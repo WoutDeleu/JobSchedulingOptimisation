@@ -98,10 +98,8 @@ public class main {
             oldWaitingJobs = deepCloneJobs(waitingJobs);
             oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
-//            executeRandomIntelligentOperation();
-//            executeRandomBasicOperation();
-
-            ruinAndRecreate();
+            executeRandomIntelligentOperation();
+            executeRandomBasicOperation();
 
             makeFeasibleSolution();
 
@@ -177,9 +175,7 @@ public class main {
                     operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
                 }
                 break;
-            case 3: // Iets beter als we het niet gebruiken
-//                int jobIndex2 = random.nextInt(jobsToShuffle.size());
-//                TwoOptSwap(jobIndex, jobIndex2);
+            case 3: ruinAndRecreate();
         }
     }
     /*********************************** LOCAL SEARCH ***********************************/
