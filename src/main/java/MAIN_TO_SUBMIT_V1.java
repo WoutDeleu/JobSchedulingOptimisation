@@ -1,15 +1,9 @@
-import com.github.sh0nk.matplotlib4j.Plot;
-import com.github.sh0nk.matplotlib4j.PythonExecutionException;
-
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-public class main {
-    // Input data
+public class MAIN_TO_SUBMIT_V1 {
     private static List<Job> allJobs;
     private static SetupList setups;
     private static List<UnavailablePeriod> unavailablePeriods;
@@ -25,70 +19,61 @@ public class main {
 
     // Optimal result
     private static LinkedList<Task> bestSchedule = new LinkedList<>();
+
+    // Parameters
+    private static final int NR_OF_ITERATIONS_BEFORE_CALCULATE = 1; // Getest: beter bij kleine waarde
     private static int NR_OF_INITIAL_PLANNED;
     private static final int NR_ITERATIONS_BEFORE_ACCEPT = 15;//TODO: nog wat zoeken naar ideale waarden,
     // voor A-100_30 meer iteraties en kleinere marge is beter
     // voor B-400-90 grotere marge is beter
-    //zeer sterk afhankelijk van random die operatie keist imo
+    //zeer sterk afhankelijk van random die operatie kiest imo
     //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
     private static final double MARGIN = 1.001;
-    private static boolean FULL_SOLUTION = false;
-    private static boolean GRAPHICS = true;
-//    private static final long availableTime = 1000*60*10; // 10 min
-    private static final long availableTime = 1000*60; // 1 min
+    private static long availableTime; // 10 min
+    //    private static final long availableTime = 1000*60; // 1 min
     private static String current_name = "";
 
-    private static Random random = new Random();
+    private static int NR_OF_THREADS;
+    private static Random random;
 
-    public static void main(String[] args) {
-        if(FULL_SOLUTION) {
-            allsolutions();
-        }
-        // Calculate solutions for manually given datasets
-        else {
-            // Reading inputs
-            InputData inputData = InputData.readFile("datasets/B-200-30.json");
-            current_name = inputData.getName();
-            System.out.print(inputData.getName());
-            setups = inputData.generateSetupList();
-            allJobs = inputData.getJobsSortedReleaseDate();
-            unavailablePeriods = inputData.getUnavailablePeriods();
-            horizon = inputData.getHorizon();
-            weight = inputData.getWeightDuration();
 
-            // Initial solution
-            scheduledTasks = new LinkedList<>();
-            jobsToShuffle = new LinkedList<>(allJobs);
-            makeFeasibleSolution();
-            currentValue = calculateCost(false);
+    public static void main(String[] arguments) {
+        String inputFile_name = arguments[0];
+        String sollutionFile_name = arguments[1];
+        random = new Random(Integer.parseInt(arguments[2]));
+        availableTime = Long.parseLong(arguments[3]) * 1000;
+        int NR_OF_THREADS = Integer.parseInt(arguments[4]);
 
-            // Get some reference values
-            NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
+        InputData inputData = InputData.readFile(inputFile_name);
+        current_name = inputData.getName();
+        setups = inputData.generateSetupList();
+        allJobs = inputData.getJobsSortedReleaseDate();
+        unavailablePeriods = inputData.getUnavailablePeriods();
+        horizon = inputData.getHorizon();
+        weight = inputData.getWeightDuration();
 
-            // Local search
-            localSearch();
+        // Initial solution
+        scheduledTasks = new LinkedList<>();
+        jobsToShuffle = new LinkedList<>(allJobs);
+        makeFeasibleSolution();
+        currentValue = calculateCost(false);
 
-            System.out.println(" cost=" + currentValue);
+        // Get some reference values
+        NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
 
-            // Write to JSON-file
-/*
-            OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
-            InputData.writeFile("calculatedSolution/sol_" + inputData.getName() + ".json", outputData);
-*/
-        }
+        // Local search
+        localSearch();
+
+        // Write to JSON-file
+        OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
+        InputData.writeFile(sollutionFile_name, outputData);
     }
-
 
     /*********************************** LOCAL SEARCH ***********************************/
     public static void localSearch() {
         int iterationCount = 0;
         long timeStart = System.currentTimeMillis();
         long timeNow = timeStart;
-
-        /**Time plot**/
-        ArrayList<Long> times = new ArrayList<>();
-        ArrayList<Long> values = new ArrayList<>();
-        /**Time plot**/
 
 
         LinkedList<Task> oldScheduling;
@@ -106,14 +91,6 @@ public class main {
 
 
             makeFeasibleSolution();
-            if(GRAPHICS) {
-                /**Time plot**/
-                long currTime = System.currentTimeMillis() - timeStart;
-                times.add(currTime);
-                values.add((long) currentValue);
-                /**Time plot**/
-            }
-
             // Replace the current solution if the new solution scores better
             // Else reset the old solution
             double tempCost = calculateCost(false);
@@ -139,17 +116,6 @@ public class main {
             iterationCount++;
         }
         System.out.println(" cost=" + currentValue);
-        /**Time plot**/
-        if(GRAPHICS) {
-            try {
-                Plotter.plotTimes(times, values, current_name);
-            } catch (PythonExecutionException e) {
-                System.out.println(e);
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-        }
-        /**Time plot**/
     }
     public static void executeRandomIntelligentOperation() {
         int option = random.nextInt(5);

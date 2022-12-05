@@ -1,73 +1,25 @@
-XXX. oplossingen indienen
-XXX. 2 basisoperaties implementeren!! (based on those, expand functionality)
-    - algemeen: zoveel mogelijk herbruikbare zaken opsplitsen in afzonderlijke functies
-    - enkel de operatie zelf, nog niet nadenken over "goede keuzes" => zie hieronder
-        - insert
-        - delete
-        - swap : volgt uit 2 bovenstaande
+1. Parameters + Dynamisch algoritme // todo Wout
+    - Na bepaalde tijd andere functies meer uitvoeren
+    - Bv. na makefeasable bepaalde dingen uitvoeren
+    - Alle parameters wa meer optimaliseren & laten variëren over tijd
+        -> bv. Worse solution than current accepting, and zeker na bepaalde period
+        -> bv. meer smartoperations naar et einde
 
-2. Local Search
-    2.1. executeOperations()
-        2.1.1 x aantal basisoperaties => parameter om mee te spelen
-        2.1.2 operaties "random" gekozen, maar wel met een redenering erachter (GOEDE KEUZES) => niet eerste met laatste swappen
+2. makefeasible more forgiving (dus ietske langer loopen, maar beter resultaat) // todo Wout
 
-    2.2. calculateStartTimes()
-        2.2.1 bereken alle starttijden voor de objecten in de linked list
-        2.3.2 makeFeasibleDates()
-            => smijt die eruit die niet voldoen aan releaseDate / dueDate
-            => dit moet tijdens toekennen starttijden, want anders zijn alle starttijden die erna komen terug fout
-            => gelijkaardig patroon aan makeFeasibleUPs() volgen: methode in klasse Task en overkoepelende in de main
+3. Opslaan current solution // todo Wannes
+    todo : Wannes - Ik ben niet goe mee waar dit moet worden toegepast, please explain - MVG Wout
 
-    2.3. makeFeasibleUPs()
-        2.3.1 smijt die eruit die overlappen met unavailable periods
-            => al gemaakt door Matthieu en aangepast door Wannes
+4. Ruin and recreate (ruin tussen twee UP' s?) // todo : Wout
 
-    2.4. feasibleInserts()
-            => Enkel nog gaten opvullen met jobs die feasible kunnen gepland worden => starttijden moeten niet herberekend worden
-            => bij hill climbing om de x keer => parameter
-            => bij steepest descent elke iteratie
+4. k opt // todo : Wout
 
-    2.5. calculateCost()
+5. smart insert // todo Wannes Vermeiren Zele
 
-    2.6. Undo/Do
-        3.4.1 origineel gewoon enkel uitvoeren als de score beter wordt
-        3.4.2 Als we lang op plateau zitten (niet verbeteren) toelaten om even een slechtere oplossing door te voeren
-              om zo terug nieuwe opties te kunnen verkennen
+6. Make feasible omdraaien  // todo: Wout
+
+7. Enkel cost + makefeasible vanaf laatste wijziging herberekenen // todo Wannes
 
 
-Todo 28/11
-- momenteel run ik gwn nog eens calculateStartTimes() op onze initial solution,
-  dus da zou een valid resultaat moeten geven, maar da is nie het geval
-- we slaan ook onze oldScheduling op maar da zijn verwijzingen naar dezelfde objecten,
-  dus als we de starttijden daarin aanpassen tijdens onze localSearch kloppen die niet meer
-  => als we terug gaan naar de oude scheduling nog eens die startTijden berekenen :( klinkt traag
-- localSearch kunnen runnen en door de validator geraken.
-- feasibleInserts()
-
-
-
-
-Extra:
-- insert enkel in gebied tussen release and startDate
-- beste oplossing (linkedlist) bijhouden zodat we slechtere oplossingen kunnen testen
-- counters to see with margins
-- in calculateStartTimes() en calculateCost() enkel berekenen van het gewijzigde gedeelte
-        => ZAL VOORAL ZIJN OBV DE VANAF!!!!! (van tot einde....)
-- op basis van de lengte van wachtlijst meer inserts of meer deletes gaan doorvoeren
-- swaps binnen bepaald gebied houden
-- inserts ongeveer op de juiste plaats (kijken naar huidige startTimes en kiezen om in te voegen op juiste plaats)
-- 3-opt operatie => Swap uitbreiden
-- ruin en recreate (ruin tussen twee UP' s?)
-- local search uitbreiden met annealing
-- parameters tweaken => kijken naar costs in excel
-- zowel steepest decent als hill climbing proberen en zien wat beste resultaat geeft
-        => niet veel aan te passen in de code om te wisselen tussen de twee
-
-
-
-Wout Delue progress 28-11
-    -> Deep Clone
-    -> Initiële oplossing omvormen tot combo calculateStartTimes() en makeFeasibleUPs()
-    -> Volgorde omdraaien => ipv zo vroeg mogelijk, zo laat mogelijk
-
-
+EXTRA:
+    - local search uitbreiden met annealing
