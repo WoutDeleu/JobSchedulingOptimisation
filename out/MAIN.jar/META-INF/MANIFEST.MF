@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: MAIN_TO_SUBMIT
-
+Main-Class: MAIN_TO_SUBMIT_V1

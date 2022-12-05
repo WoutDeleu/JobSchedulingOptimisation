@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -39,7 +40,7 @@ public class MAIN_TO_SUBMIT_V1 {
 
     public static void main(String[] arguments) {
         String inputFile_name = arguments[0];
-        String sollutionFile_name = arguments[1];
+        String solutionFile_name = arguments[1];
         random = new Random(Integer.parseInt(arguments[2]));
         availableTime = Long.parseLong(arguments[3]) * 1000;
         int NR_OF_THREADS = Integer.parseInt(arguments[4]);
@@ -66,7 +67,7 @@ public class MAIN_TO_SUBMIT_V1 {
 
         // Write to JSON-file
         OutputData outputData = InputData.generateOutput(inputData.getName(), currentValue, scheduledTasks);
-        InputData.writeFile(sollutionFile_name, outputData);
+        InputData.writeFile(solutionFile_name, outputData);
     }
 
     /*********************************** LOCAL SEARCH ***********************************/
@@ -540,6 +541,5 @@ public class MAIN_TO_SUBMIT_V1 {
         bestSchedule.clear();
     }
     /*********************************** Full solution ***********************************/
-
 }
 

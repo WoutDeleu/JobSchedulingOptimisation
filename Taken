@@ -13,9 +13,6 @@
 
 2. makefeasible more forgiving (dus ietske langer loopen, maar beter resultaat) // todo Wout
 
-3. Opslaan current solution // todo Wannes
-    todo : Wannes - Ik ben niet goe mee waar dit moet worden toegepast, please explain - MVG Wout
-
 4. Ruin and recreate (ruin tussen twee UP' s?) // todo : Wout
 
 4. k opt // todo : Wout
@@ -25,6 +22,8 @@
 
 EXTRA:
     - local search uitbreiden met annealing
+
+https://stackoverflow.com/questions/574594/how-can-i-create-an-executable-runnable-jar-with-dependencies-using-maven
 5. smart insert // todo Wannes Vermeiren Zele
 
 6. Make feasible omdraaien  // todo: Wout

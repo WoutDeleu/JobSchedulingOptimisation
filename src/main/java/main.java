@@ -68,7 +68,7 @@ public class main {
             // Local search
             localSearch();
 
-            printEarlinessPenaltiesPerJob();
+//            printEarlinessPenaltiesPerJob();
 
             // Write to JSON-file
             OutputData outputData = InputData.generateOutput(inputData.getName(), bestValue, bestSchedule);
@@ -98,8 +98,10 @@ public class main {
             oldWaitingJobs = deepCloneJobs(waitingJobs);
             oldJobsToShuffle = deepCloneJobs(jobsToShuffle);
 
-            executeRandomIntelligentOperation();
-            executeRandomBasicOperation();
+//            executeRandomIntelligentOperation();
+//            executeRandomBasicOperation();
+
+            ruinAndRecreate();
 
             makeFeasibleSolution();
 
@@ -573,6 +575,26 @@ public class main {
         bestSchedule.clear();
     }
     /*********************************** Full solution ***********************************/
+
+
+    public static void ruinAndRecreate() {
+        int i1 = random.nextInt(jobsToShuffle.size());
+        int i2 = random.nextInt(jobsToShuffle.size());
+        int startIndex = Math.min(i1, i2);
+        int endIndex = Math.min(i1, i2);
+        ArrayList<Job> removed = new ArrayList<>();
+        for(int i= startIndex; i<endIndex; i++) {
+            removed.add(jobsToShuffle.get(i));
+        }
+        for(Job job : removed) {
+            jobsToShuffle.remove(job);
+        }
+        for(int i=startIndex; i<endIndex; i++) {
+            int jobNr = random.nextInt(removed.size());
+            jobsToShuffle.add(i, removed.get(jobNr));
+            removed.remove(jobNr);
+        }
+    }
 
 }
 
