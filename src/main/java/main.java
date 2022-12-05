@@ -37,8 +37,8 @@ public class main {
     private static final double MARGIN = 1.001;
     private static boolean FULL_SOLUTION = false;
     private static boolean GRAPHICS = true;
-    private static final long availableTime = 1000*60*10; // 10 min
-//    private static final long availableTime = 1000*60; // 1 min
+//    private static final long availableTime = 1000*60*10; // 10 min
+    private static final long availableTime = 1000*60; // 1 min
     private static String current_name = "";
 
     private static Random random = new Random();
