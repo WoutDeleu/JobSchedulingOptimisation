@@ -1,3 +1,9 @@
+    // voor A-100_30 meer iteraties en kleinere marge is beter
+    // voor B-400-90 grotere marge is beter
+    //zeer sterk afhankelijk van random die operatie keist imo
+    //met zelfde parameters run1: kost= 1003000 run2: kost=880000 (dataset B-400-90 tijd = 1min)
+
+
 1. Parameters + Dynamisch algoritme // todo Wout
     - Na bepaalde tijd andere functies meer uitvoeren
     - Bv. na makefeasable bepaalde dingen uitvoeren
