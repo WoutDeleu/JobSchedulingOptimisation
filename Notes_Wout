@@ -10,3 +10,4 @@ twoOpt?
 nieuwe makeFeasible? (reverse?)
 multithreading?
     => hoe?
+    =>https://stackoverflow.com/questions/13981227/using-multithreading-two-threads-return-same-value-with-different-inputs
