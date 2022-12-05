@@ -1,0 +1,7 @@
+
+Z	java:S106="9Replace this use of System.out or System.err by a logger.(§«†Ûþÿÿÿÿ8ÄŽ©ŽÎ0
+Z	java:S106A"9Replace this use of System.out or System.err by a logger.(úº‘žüÿÿÿÿ8ÅŽ©ŽÎ0
+Z	java:S106C"9Replace this use of System.out or System.err by a logger.(ªÓ¼áþÿÿÿÿ8ÅŽ©ŽÎ0
+Š
+java:S1319s"oThe type of "scheduledTasks" should be an interface such as "List" rather than the implementation "LinkedList".(ÓŒÔ’ÿÿÿÿÿ
+r	java:S1174"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ìÖœçûÿÿÿÿ8ÒŽ©ŽÎ0

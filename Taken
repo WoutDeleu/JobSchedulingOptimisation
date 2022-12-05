@@ -20,12 +20,11 @@
 
 4. k opt // todo : Wout
 
-5. smart insert // todo Wannes Vermeiren Zele
-
-6. Make feasible omdraaien  // todo: Wout
-
 7. Enkel cost + makefeasible vanaf laatste wijziging herberekenen // todo Wannes
 
 
 EXTRA:
     - local search uitbreiden met annealing
+5. smart insert // todo Wannes Vermeiren Zele
+
+6. Make feasible omdraaien  // todo: Wout
