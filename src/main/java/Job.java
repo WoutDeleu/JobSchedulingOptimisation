@@ -127,4 +127,9 @@ public class Job extends Task{
 //                ", finishDate=" + finishDate +
                         "}";
     }
+
+    public double getScheduledCostTemp(int startDate_temp) {
+        int finishDate_temp = startDate_temp+getDuration()-1;
+        return earlinessPenalty*(dueDate - finishDate_temp);
+    }
 }

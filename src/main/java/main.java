@@ -1,4 +1,3 @@
-import com.github.sh0nk.matplotlib4j.Plot;
 import com.github.sh0nk.matplotlib4j.PythonExecutionException;
 
 import java.io.File;
@@ -30,18 +29,20 @@ public class main {
 
     private static boolean FULL_SOLUTION = false;
     private static boolean GRAPHICS = false;
-    //    private static final long availableTime = 1000*60*10; // 10 min
-    private static final long availableTime = 1000*60*1; // 1 min
+//    private static final long availableTime = 1000*60*10; // 10 min
+//    private static final long availableTime = 1000*60*1; // 1 min
+    private static final long availableTime = 1000*30; // 30s
     private static String current_name = "";
 
-    private static Random random = new Random();
+    private static Random random = new Random(2);
 
     public static void main(String[] args) {
         if(FULL_SOLUTION) {allSolutions();}
         // Calculate solutions for manually given datasets
         else {
             // Reading inputs
-            InputData inputData = InputData.readFile("datasets/A-100-30.json");
+            InputData inputData = InputData.readFile("datasets/B-100-30.json");
+            System.out.print(inputData.getName());
             current_name = inputData.getName();
             setups = inputData.generateSetupList();
             allJobs = inputData.getJobsSortedReleaseDate();
@@ -60,7 +61,7 @@ public class main {
             currentValue = calculateCost(false);
             bestValue = currentValue;
             bestSchedule = deepClone(scheduledTasks);
-            System.out.println("initial cost: "+bestValue);
+//            System.out.println("initial cost: "+bestValue);
 
             // Get some reference values
             NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
@@ -68,8 +69,9 @@ public class main {
             // Local search
             localSearch();
 
+            System.out.println(" cost="+currentValue);
 //            printEarlinessPenaltiesPerJob();
-            printScheduledTasks();
+//            printScheduledTasks();
 
             // Write to JSON-file
             OutputData outputData = InputData.generateOutput(inputData.getName(), bestValue, bestSchedule);
@@ -94,6 +96,12 @@ public class main {
         LinkedList<Job> oldJobsToShuffle;
 
         while (timeNow<timeStart+availableTime) {
+            if(GRAPHICS) {
+                long currTime = System.currentTimeMillis() - timeStart;
+                times.add(currTime);
+                values.add((long) currentValue);
+            }
+
             // Save the current situation
             oldScheduling = deepClone(scheduledTasks);
             oldWaitingJobs = deepCloneJobs(waitingJobs);
@@ -102,13 +110,14 @@ public class main {
             executeRandomBasicOperation();
             executeRandomIntelligentOperation();
 
-//            makeFeasibleSolution();
-            inverseMakeFeasibleSolution();
-
-            if(GRAPHICS) {
-                long currTime = System.currentTimeMillis() - timeStart;
-                times.add(currTime);
-                values.add((long) currentValue);
+            double x = random.nextDouble();
+            if (x < inverseBias) {
+                inverseMakeFeasibleSolution();
+                inverse = true;
+            }
+            else {
+                makeFeasibleSolution();
+                inverse = false;
             }
 
             double tempCost = calculateCost(false);
@@ -117,7 +126,7 @@ public class main {
             // Accept better solution
             if (tempCost < currentValue) {
                 long time = (timeNow-timeStart)/1000;
-                System.out.println("Verbetering gevonden!, Cost: "+tempCost+", na "+time+" seconden");
+                System.out.println("Verbetering gevonden!, Bias: "+inverseBias+" Cost: "+tempCost+", na "+time+" seconden");
 
                 currentValue = tempCost;
 
@@ -135,7 +144,7 @@ public class main {
                 if (p > r) {
                     currentValue = tempCost;
                     long time = (timeNow - timeStart) / 1000;
-                    System.out.println("Slechter geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
+//                    System.out.println("Slechter geaccepteerd! Cost: "+tempCost+", na "+time+" seconden");
                 }
 
                 // Reset old solution
@@ -171,9 +180,10 @@ public class main {
         int option = random.nextInt(4);
         if(calculateRejectionCost()>2*calculateDurationCost()) option = 2;
         switch (option) {
-            case 0: if (jobsToShuffle.size()>10) //todo betere logica
-                operation_deleteJob(jobIndex);
-                break;
+            case 0: if (jobsToShuffle.size()>10) {
+                    operation_deleteJob(jobIndex);
+                    break;
+                }
             case 1: operation_swapJobs(jobIndex, random.nextInt(jobsToShuffle.size())); break;
             case 2: // insert
                 if (!waitingJobs.isEmpty()) {
@@ -181,9 +191,10 @@ public class main {
                     operation_insertJob(jobIndex, waitingJobs.get(waitingIndex));
                 }
                 break;
-            case 3: ruinAndRecreate();
+            case 3: ruinAndRecreate(jobIndex);
         }
     }
+
     /*********************************** LOCAL SEARCH ***********************************/
 
 
@@ -284,6 +295,44 @@ public class main {
         for (int c = i2+1; c < jobsToShuffle.size(); c++) temp.add(jobsToShuffle.get(c));
         jobsToShuffle = new LinkedList<>(temp);
     }
+    public static void ruinAndRecreate(int startIndex) {
+        int endIndex = randomRuinSpanMild(startIndex);
+        if(endIndex < startIndex) {
+            int temp = endIndex;
+            endIndex = startIndex;
+            startIndex = temp;
+        }
+        ArrayList<Job> removed = new ArrayList<>();
+        for(int i= startIndex; i<endIndex; i++) {
+            removed.add(jobsToShuffle.get(i));
+        }
+        for(Job job : removed) {
+            jobsToShuffle.remove(job);
+        }
+        for(int i=startIndex; i<endIndex; i++) {
+            int jobNr = random.nextInt(removed.size());
+            jobsToShuffle.add(i, removed.get(jobNr));
+            removed.remove(jobNr);
+        }
+    }
+    private static int randomRuinSpanMild(int jobIndex) {
+        int endIndex, span, size = jobsToShuffle.size();
+        if(jobIndex < 0.7*size) {
+            span = random.nextInt((int) (0.3*size));
+        }
+        else if(jobIndex < 0.8*size) {
+            span = random.nextInt((int) (0.2*size));
+        }
+        else if(jobIndex < 0.9* size) {
+            span = random.nextInt((int) (0.1*size));
+        }
+        else {
+            span = random.nextInt(jobsToShuffle.size() - jobIndex);
+            jobIndex = jobIndex - span;
+        }
+        endIndex = jobIndex + span;
+        return endIndex;
+    }
     /*********************************** ADVANCED OPERATIONS ***********************************/
 
 
@@ -297,23 +346,31 @@ public class main {
 
         for(Job job : jobsToShuffle) {
             if(!maxReached) {
-                scheduleJob(job);
-                if (job.getFinishDate()>=horizon) {
+                boolean succesfull = scheduleJob(job);
+                if (job.getFinishDate() >= horizon && succesfull) {
                     trim();
-                    maxReached=true;
+                    maxReached = true;
                 }
             }
-            else{queueJob(job);}
+            else {
+                queueJob(job);
+            }
         }
         for (Job job : toRemove) jobsToShuffle.remove(job);
     }
-    private static void scheduleJob(Job job) {
+    private static boolean scheduleJob(Job job) {
         // No setup for first job
         if (scheduledTasks.isEmpty()) {
             int startDate = job.getReleaseDate();
             startDate = calculateFittingStartTimeUPs(startDate, job);
-
-            planAndPlaceJob(job, startDate);
+            if(job.getScheduledCostTemp(startDate) < job.getRejectionPenalty()) {
+                planAndPlaceJob(job, startDate);
+                return true;
+            }
+            else {
+                queueJob(job);
+                return false;
+            }
         }
         // All others require a setup
         else {
@@ -329,7 +386,14 @@ public class main {
             int startDateJob = Math.max(job.getReleaseDate(), startDateSetup + setup.getDuration());
             startDateJob = calculateFittingStartTimeUPs(startDateJob, job);
 
-            planAndPlaceJobWithSetup(setup, startDateSetup, job, startDateJob);
+            if(job.getScheduledCostTemp(startDateJob) < job.getRejectionPenalty()) {
+                planAndPlaceJobWithSetup(setup, startDateSetup, job, startDateJob);
+                return true;
+            }
+            else {
+                queueJob(job);
+                return false;
+            }
         }
     }
     public static void trim() {
@@ -467,13 +531,6 @@ public class main {
 
 
     /*********************************** ASSISTING FUNCTIONS ***********************************/
-//    public static double calculateCost() {
-//        double cost = 0;
-//        for (Job job : allJobs) cost += job.getCost();
-//        if (!scheduledTasks.isEmpty()) // add total schedule duration
-//            cost += (scheduledTasks.getLast().getFinishDate()-scheduledTasks.getFirst().getStartDate()+1)*weight;
-//        return (double) Math.round(cost * 100) / 100;
-//    }
     public static double calculateCost(boolean print) {
         double earliness = 0;
         for (Task task : scheduledTasks)
@@ -584,6 +641,18 @@ public class main {
         }
         System.out.println(i + ": " + scheduledTasks.get(i));
     }
+    public static void printWaitingJobs() {
+        System.out.println("Size of waiting jobs: " + waitingJobs.size());
+        if(waitingJobs.isEmpty()) {
+            System.out.println("scheduledTasks is empty");
+            return;
+        }
+        int i;
+        for(i = 0; i < waitingJobs.size()-1; i++) {
+            System.out.print(i + ": " + waitingJobs.get(i) + " ->\t" );
+        }
+        System.out.println(i + ": " + waitingJobs.get(i));
+    }
     public static void printEarlinessPenaltiesPerJob() {
         int i;
         for(i = 0; i < scheduledTasks.size()-1; i++) {
@@ -611,12 +680,19 @@ public class main {
             unavailablePeriods = inputData.getUnavailablePeriods();
             horizon = inputData.getHorizon();
             weight = inputData.getWeightDuration();
+            inverseUnavailablePeriods = new LinkedList<>(unavailablePeriods);
+            Collections.reverse(inverseUnavailablePeriods);
+
 
             // Initial solution
             scheduledTasks = new LinkedList<>();
             jobsToShuffle = new LinkedList<>(allJobs);
+//            inverseMakeFeasibleSolution();
             makeFeasibleSolution();
             currentValue = calculateCost(false);
+            bestValue = currentValue;
+            bestSchedule = deepClone(scheduledTasks);
+//            System.out.println("initial cost: "+bestValue);
 
             // Get some reference values
             NR_OF_INITIAL_PLANNED = jobsToShuffle.size();
@@ -648,25 +724,6 @@ public class main {
     }
     /*********************************** Full solution ***********************************/
 
-
-    public static void ruinAndRecreate() {
-        int i1 = random.nextInt(jobsToShuffle.size());
-        int i2 = random.nextInt(jobsToShuffle.size());
-        int startIndex = Math.min(i1, i2);
-        int endIndex = Math.min(i1, i2);
-        ArrayList<Job> removed = new ArrayList<>();
-        for(int i= startIndex; i<endIndex; i++) {
-            removed.add(jobsToShuffle.get(i));
-        }
-        for(Job job : removed) {
-            jobsToShuffle.remove(job);
-        }
-        for(int i=startIndex; i<endIndex; i++) {
-            int jobNr = random.nextInt(removed.size());
-            jobsToShuffle.add(i, removed.get(jobNr));
-            removed.remove(jobNr);
-        }
-    }
 
 }
 
