@@ -83,6 +83,8 @@ public class main {
 
     /*********************************** LOCAL SEARCH ***********************************/
     public static void localSearch() {
+        double inverseBias = 0.5; // The bigger this number gets the more we execute inverseMakeFeasibleSolution()
+        boolean inverse = false;
         double T = 1;
         long timeStart = System.currentTimeMillis();
         long timeNow = timeStart;
@@ -125,6 +127,9 @@ public class main {
 
             // Accept better solution
             if (tempCost < currentValue) {
+                if (inverse && inverseBias < 0.95) inverseBias += 0.01;
+                else if (!inverse && inverseBias > 0.05) inverseBias -= 0.01;
+
                 long time = (timeNow-timeStart)/1000;
                 System.out.println("Verbetering gevonden!, Bias: "+inverseBias+" Cost: "+tempCost+", na "+time+" seconden");
 
