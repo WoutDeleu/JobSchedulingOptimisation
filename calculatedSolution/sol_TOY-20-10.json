@@ -1,183 +1,183 @@
 {
   "name": "TOY-20-10",
-  "value": 8182.59,
+  "value": 7746.67,
   "jobs": [
     {
       "id": 12,
-      "start": 0
+      "start": 42
     },
     {
       "id": 6,
-      "start": 59
+      "start": 175
     },
     {
       "id": 3,
-      "start": 94
-    },
-    {
-      "id": 9,
-      "start": 309
+      "start": 300
     },
     {
       "id": 1,
-      "start": 342
-    },
-    {
-      "id": 13,
-      "start": 385
-    },
-    {
-      "id": 11,
-      "start": 418
-    },
-    {
-      "id": 0,
-      "start": 552
-    },
-    {
-      "id": 19,
-      "start": 593
-    },
-    {
-      "id": 2,
-      "start": 649
-    },
-    {
-      "id": 5,
-      "start": 682
-    },
-    {
-      "id": 18,
-      "start": 1014
-    },
-    {
-      "id": 16,
-      "start": 1034
-    },
-    {
-      "id": 7,
-      "start": 1092
-    },
-    {
-      "id": 8,
-      "start": 1135
-    },
-    {
-      "id": 10,
-      "start": 1164
-    },
-    {
-      "id": 4,
-      "start": 1186
-    },
-    {
-      "id": 17,
-      "start": 1208
-    },
-    {
-      "id": 14,
-      "start": 1215
+      "start": 332
     },
     {
       "id": 15,
-      "start": 1223
+      "start": 374
+    },
+    {
+      "id": 13,
+      "start": 419
+    },
+    {
+      "id": 17,
+      "start": 452
+    },
+    {
+      "id": 19,
+      "start": 462
+    },
+    {
+      "id": 14,
+      "start": 517
+    },
+    {
+      "id": 11,
+      "start": 526
+    },
+    {
+      "id": 0,
+      "start": 573
+    },
+    {
+      "id": 9,
+      "start": 614
+    },
+    {
+      "id": 5,
+      "start": 648
+    },
+    {
+      "id": 2,
+      "start": 691
+    },
+    {
+      "id": 4,
+      "start": 1014
+    },
+    {
+      "id": 18,
+      "start": 1040
+    },
+    {
+      "id": 7,
+      "start": 1067
+    },
+    {
+      "id": 8,
+      "start": 1111
+    },
+    {
+      "id": 10,
+      "start": 1141
+    },
+    {
+      "id": 16,
+      "start": 1165
     }
   ],
   "setups": [
     {
       "from": 12,
       "to": 6,
-      "start": 54
+      "start": 170
     },
     {
       "from": 6,
       "to": 3,
-      "start": 88
+      "start": 294
     },
     {
       "from": 3,
-      "to": 9,
-      "start": 123
-    },
-    {
-      "from": 9,
       "to": 1,
-      "start": 338
+      "start": 330
     },
     {
       "from": 1,
+      "to": 15,
+      "start": 372
+    },
+    {
+      "from": 15,
       "to": 13,
-      "start": 381
+      "start": 416
     },
     {
       "from": 13,
+      "to": 17,
+      "start": 448
+    },
+    {
+      "from": 17,
+      "to": 19,
+      "start": 457
+    },
+    {
+      "from": 19,
+      "to": 14,
+      "start": 515
+    },
+    {
+      "from": 14,
       "to": 11,
-      "start": 413
+      "start": 522
     },
     {
       "from": 11,
       "to": 0,
-      "start": 460
+      "start": 569
     },
     {
       "from": 0,
-      "to": 19,
-      "start": 590
+      "to": 9,
+      "start": 612
     },
     {
-      "from": 19,
-      "to": 2,
-      "start": 645
-    },
-    {
-      "from": 2,
+      "from": 9,
       "to": 5,
-      "start": 678
+      "start": 644
     },
     {
       "from": 5,
+      "to": 2,
+      "start": 687
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "start": 1010
+    },
+    {
+      "from": 4,
       "to": 18,
-      "start": 1009
+      "start": 1035
     },
     {
       "from": 18,
-      "to": 16,
-      "start": 1030
-    },
-    {
-      "from": 16,
       "to": 7,
-      "start": 1087
+      "start": 1061
     },
     {
       "from": 7,
       "to": 8,
-      "start": 1133
+      "start": 1109
     },
     {
       "from": 8,
       "to": 10,
-      "start": 1162
+      "start": 1139
     },
     {
       "from": 10,
-      "to": 4,
-      "start": 1184
-    },
-    {
-      "from": 4,
-      "to": 17,
-      "start": 1206
-    },
-    {
-      "from": 17,
-      "to": 14,
-      "start": 1212
-    },
-    {
-      "from": 14,
-      "to": 15,
-      "start": 1219
+      "to": 16,
+      "start": 1162
     }
   ]
 }

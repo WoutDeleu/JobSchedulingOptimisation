@@ -6,10 +6,7 @@
         -> bv. Worse solution than current accepting, and zeker na bepaalde period
         -> bv. meer smartoperations naar et einde
 
-2. makefeasible more forgiving (dus ietske langer loopen, maar beter resultaat) // todo Wout
-
-4. Ruin and recreate (ruin tussen twee UP' s?) // todo : Wout
-       => gewoon een bepaalde waarde instellen voor hoe een groot gebied we verwijderen
+2. makefeasible more forgiving (dus ietske langer lopen, maar beter resultaat) // todo Wout
 
 4. k opt // todo : Wout
 5. smart insert // todo Wannes Vermeiren Zele
@@ -17,5 +14,3 @@
 
 
 https://stackoverflow.com/questions/574594/how-can-i-create-an-executable-runnable-jar-with-dependencies-using-maven
-
-

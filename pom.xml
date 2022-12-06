@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>JobScheduling</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>JobScheduler</artifactId>
+    <version>FINAL</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
