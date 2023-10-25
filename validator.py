@@ -5,7 +5,7 @@ import math;
 from enum import Enum;
 
 MAX_INT = 1000000
-
+test = 4
 ## Prepare the arguments the program shall receive
 def __prepareargs__():
     parser = argparse.ArgumentParser(description='Validate solution files for OMP Scheduling problems.')
